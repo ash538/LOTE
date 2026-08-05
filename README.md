@@ -1,3 +1,26 @@
+# LOTE Tools
+
+Two apps share this repo and one Express server:
+
+- **Quote Builder** — online quote builder with backend rates for team use (`/api/rates`, `/api/quotes`)
+- **Engagement Portal backend** — API for the Transurban × LOTE CALD NAT portal concept, with JMS (job management system) integration (`/api/portal`). See [docs/JMS_INTEGRATION.md](docs/JMS_INTEGRATION.md) for the full API surface and integration contract.
+
+## Engagement Portal backend
+
+Serves everything in the portal concept from a real API instead of hardcoded
+frontend data + localStorage:
+
+- **Reference data & decision tools** — language profiles, corridor prioritisation scoring (Translation Decision Tool), postcode/LGA community lookup, personas, interventions, org directory
+- **Engagement plans** — persistence for the Engagement Planner wizard
+- **Translation requests** — Request Centre with a full lifecycle (draft → submitted → quoted → in production → in review → delivered → closed) and audit trail
+- **JMS integration** — submits requests as JMS jobs, receives signed status webhooks, mock mode for local dev (`JMS_MODE=mock`, the default)
+- **Insights feed & org engagement tracking**
+
+```bash
+npm run seed:portal   # seed research insights + org engagement state
+npm run server        # portal API at /api/portal, quote builder at /api/quotes
+```
+
 # LOTE Quote Builder
 
 Online quote builder with backend rates for team use. Build professional quotes by selecting services from a managed rate card.
