@@ -55,9 +55,10 @@ Visiting that URL in a browser should show
 
 ### 5. Share the link with staff
 
-Send staff the hosted page URL. The organisation is recorded as
-**Woolworths** by default; you can override it per link with a query
-parameter, so the same page can serve other clients:
+Send staff the hosted page URL. The organisation field is prefilled with
+**Woolworths** by default (respondents can edit it); you can prefill a
+different organisation per link with a query parameter, so the same page
+can serve other clients:
 
 ```
 https://<your-host>/human-index/?org=Woolworths%20Metro
@@ -70,7 +71,7 @@ One row per completed check:
 | Columns | Contents |
 |---|---|
 | Timestamp | When the response was received (Sheet's timezone) |
-| Organisation, Name, Email, Team / role, Store / site | Who answered (name required, rest optional) |
+| Organisation, Name, Email, Team / role, Store / site | Who answered. Name, role title, organisation and email are all required; role title is stored in the "Team / role" column and "Store / site" is no longer collected (kept for column compatibility) |
 | HXI score, Band | Overall index (geometric mean) and its band |
 | Knowledge, Capability, Capacity, Trust | The four domain scores |
 | Unsure answers | How many of the 16 checks were answered "Honestly don't know" |

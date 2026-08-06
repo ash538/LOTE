@@ -152,14 +152,14 @@
       </div>
       <div class="aboutcard" id="aboutyou">
         <h3>Before you start</h3>
-        <p>Your answers are recorded so your team can look at the results together. Only your name is required.</p>
+        <p>Your answers are recorded so your team can look at the results together. All four details are required.</p>
         <div class="fieldgrid">
           <div class="field"><label for="f_name">Name <span class="req">*</span></label><input id="f_name" type="text" autocomplete="name"></div>
-          <div class="field"><label for="f_email">Work email (optional)</label><input id="f_email" type="email" autocomplete="email"></div>
-          <div class="field"><label for="f_team">Team or role (optional)</label><input id="f_team" type="text"></div>
-          <div class="field"><label for="f_store">Store / site / location (optional)</label><input id="f_store" type="text"></div>
+          <div class="field"><label for="f_role">Role title <span class="req">*</span></label><input id="f_role" type="text" autocomplete="organization-title"></div>
+          <div class="field"><label for="f_org">Organisation <span class="req">*</span></label><input id="f_org" type="text" autocomplete="organization"></div>
+          <div class="field"><label for="f_email">Email address <span class="req">*</span></label><input id="f_email" type="email" autocomplete="email"></div>
         </div>
-        <div class="field-err" id="fielderr">Please enter your name before starting.</div>
+        <div class="field-err" id="fielderr">Please fill in all four details before starting.</div>
       </div>
       <button class="btn" id="startbtn">Start the check</button>
     </div>
@@ -229,7 +229,7 @@ window.onerror=function(msg,url,line,col){
    and SETUP.md in this folder).
    1. Deploy apps-script/Code.gs as a web app (Execute as: Me, Access: Anyone).
    2. Paste the deployment's /exec URL below. */
-var SHEETS_ENDPOINT="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+var SHEETS_ENDPOINT="https://script.google.com/macros/s/AKfycbyVQcjxUgV3srkoa__GZXcbsd5pBAWulPiDmsXaH4wu-dDqNblcn2bQy7gbefslWRFZIA/exec";
 var TOOL_VERSION="v7.3";
 var DEFAULT_ORG="Woolworths"; // override per-link with ?org=Some%20Org
 var ORG=(function(){var m=/[?&]org=([^&]+)/.exec(window.location.search);return m?decodeURIComponent(m[1].replace(/\+/g," ")):DEFAULT_ORG;})();
@@ -456,15 +456,19 @@ var STREAMS=[
 
 var si=0;
 var answers=STREAMS.map(function(){return null;}); // 1..5 level, 0 none, "unsure"
-var participant={name:"",email:"",team:"",store:""};
+var participant={name:"",role:"",org:"",email:""};
 var startedAt=null,submitted=false;
 function el(id){return document.getElementById(id);}
 
 function start(){
-  var name=el("f_name").value.replace(/^\s+|\s+$/g,"");
-  if(!name){el("fielderr").style.display="block";el("f_name").focus();return;}
-  el("fielderr").style.display="none";
-  participant={name:name,email:el("f_email").value.replace(/^\s+|\s+$/g,""),team:el("f_team").value.replace(/^\s+|\s+$/g,""),store:el("f_store").value.replace(/^\s+|\s+$/g,"")};
+  function val(id){return el(id).value.replace(/^\s+|\s+$/g,"");}
+  var name=val("f_name"),role=val("f_role"),org=val("f_org"),email=val("f_email");
+  var missing=!name?"f_name":!role?"f_role":!org?"f_org":!email?"f_email":null;
+  var err=el("fielderr");
+  if(missing){err.textContent="Please fill in all four details before starting.";err.style.display="block";el(missing).focus();return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err.textContent="That email address doesn’t look right — please check it.";err.style.display="block";el("f_email").focus();return;}
+  err.style.display="none";
+  participant={name:name,role:role,org:org,email:email};
   startedAt=Date.now();
   el("intro").classList.add("hide");el("assess").classList.remove("hide");render();window.scrollTo(0,0);
 }
@@ -512,7 +516,9 @@ function recordResponse(sScores,dScores,hxi,band,unsure){
     s.textContent="Response not recorded: this page is not yet connected to Google Sheets (see SETUP.md).";
     s.className="savestatus err";return;
   }
-  var p={version:TOOL_VERSION,org:ORG,name:participant.name,email:participant.email,team:participant.team,store:participant.store,
+  // "team" and "store" keys match the deployed Apps Script's columns:
+  // role title lands in "Team / role"; "Store / site" is no longer collected.
+  var p={version:TOOL_VERSION,org:participant.org,name:participant.name,email:participant.email,team:participant.role,store:"",
          hxi:hxi.toFixed(1),band:band,
          d_knowledge:dScores[0].toFixed(1),d_capability:dScores[1].toFixed(1),d_capacity:dScores[2].toFixed(1),d_trust:dScores[3].toFixed(1),
          unsure_count:unsure,duration_sec:startedAt?Math.round((Date.now()-startedAt)/1000):""};
@@ -594,6 +600,7 @@ function results(){
   window.scrollTo(0,0);
 }
 
+el("f_org").value=ORG;
 el("startbtn").onclick=start;
 el("backbtn").onclick=back;
 el("optnone").onclick=function(){answer(0)};
