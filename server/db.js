@@ -1,7 +1,8 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'quotes.db');
+// DB_PATH lets production hosts point the database at a persistent disk
+const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'quotes.db');
 const db = new Database(dbPath);
 
 // Enable WAL mode for better concurrency

@@ -35,7 +35,7 @@ A custom CRM with an integrated quote builder. Manage contacts, companies, and a
 npm install
 cd client && npm install && cd ..
 
-# Seed sample rates + sample CRM data
+# Seed sample rates (add `npm run seed:demo` for sample CRM data too)
 npm run seed
 
 # Run in development (API + React)
@@ -117,3 +117,9 @@ npm start       # Serve API + static frontend
 ```
 
 Existing quote databases upgrade automatically — the CRM tables and quote-link columns are added on first startup without touching your data.
+
+Set `DB_PATH` to store the SQLite database on a persistent disk (recommended for hosts with ephemeral filesystems like Render/Heroku, where the default location is wiped on each deploy):
+
+```bash
+DB_PATH=/var/data/quotes.db npm start
+```

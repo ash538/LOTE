@@ -46,9 +46,13 @@ const insertMany = db.transaction((items) => {
 insertMany(rates);
 console.log(`Seeded ${rates.length} rates successfully.`);
 
-// Sample CRM data (only seeded once — skipped if companies already exist)
+// Sample CRM data — opt-in via `npm run seed:demo` (or SEED_DEMO=1) so
+// production databases start clean. Skipped if companies already exist.
+const wantDemo = process.env.SEED_DEMO === '1' || process.argv.includes('--demo');
 const existingCompanies = db.prepare('SELECT COUNT(*) AS c FROM companies').get().c;
-if (existingCompanies === 0) {
+if (!wantDemo) {
+  console.log('Skipping sample CRM data (run `npm run seed:demo` to include it).');
+} else if (existingCompanies === 0) {
   console.log('Seeding sample CRM data...');
 
   const companies = [
