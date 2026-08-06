@@ -8,6 +8,9 @@
  * Full walkthrough in ../SETUP.md.
  */
 
+// The Google Sheet that stores responses. Targeting it by ID means the script
+// works whether or not it is container-bound to the Sheet.
+var SPREADSHEET_ID = "1bZ9XByOflMXhmAMKQTNSl5UmQ2jWGf_HfIpcwezhoLU";
 var SHEET_NAME = "Responses";
 
 // Order matters: must match the order the HTML tool asks its 16 checks in.
@@ -29,7 +32,7 @@ function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(headers_());
