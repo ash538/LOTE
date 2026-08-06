@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, NavLink } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
 import ContactsPage from './pages/ContactsPage';
 import ContactDetailPage from './pages/ContactDetailPage';
@@ -11,9 +11,12 @@ import RatesPage from './pages/RatesPage';
 import QuotesPage from './pages/QuotesPage';
 import QuoteBuilderPage from './pages/QuoteBuilderPage';
 
+// Demo builds run from a static page with no server routing, so use hash URLs
+const Router = process.env.REACT_APP_DEMO === '1' ? HashRouter : BrowserRouter;
+
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <div className="header">
         <div className="container">
           <h1>LOTE CRM</h1>
@@ -42,7 +45,7 @@ function App() {
           <Route path="/quotes/:id" element={<QuoteBuilderPage />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
