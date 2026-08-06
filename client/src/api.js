@@ -1,39 +1,24 @@
-const BASE = '/api';
+// API switch: the real server API by default, or the in-browser
+// localStorage implementation when built with REACT_APP_DEMO=1.
+import * as remote from './api-remote';
+import * as local from './api-local';
 
-async function request(url, options = {}) {
-  const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || 'Request failed');
-  }
-  return res.json();
-}
+const impl = process.env.REACT_APP_DEMO === '1' ? local : remote;
 
-// Rates
-export const getRates = (params = {}) => {
-  const qs = new URLSearchParams(params).toString();
-  return request(`/rates${qs ? `?${qs}` : ''}`);
-};
-export const getCategories = () => request('/rates/categories');
-export const createRate = (data) => request('/rates', { method: 'POST', body: JSON.stringify(data) });
-export const updateRate = (id, data) => request(`/rates/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteRate = (id) => request(`/rates/${id}`, { method: 'DELETE' });
-
-// Quotes
-export const getQuotes = (params = {}) => {
-  const qs = new URLSearchParams(params).toString();
-  return request(`/quotes${qs ? `?${qs}` : ''}`);
-};
-export const getQuote = (id) => request(`/quotes/${id}`);
-export const createQuote = (data) => request('/quotes', { method: 'POST', body: JSON.stringify(data) });
-export const updateQuote = (id, data) => request(`/quotes/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteQuote = (id) => request(`/quotes/${id}`, { method: 'DELETE' });
-export const duplicateQuote = (id) => request(`/quotes/${id}/duplicate`, { method: 'POST' });
-
-// Quote Items
-export const addQuoteItem = (quoteId, data) => request(`/quotes/${quoteId}/items`, { method: 'POST', body: JSON.stringify(data) });
-export const updateQuoteItem = (quoteId, itemId, data) => request(`/quotes/${quoteId}/items/${itemId}`, { method: 'PUT', body: JSON.stringify(data) });
-export const removeQuoteItem = (quoteId, itemId) => request(`/quotes/${quoteId}/items/${itemId}`, { method: 'DELETE' });
+export const {
+  // Rates
+  getRates, getCategories, createRate, updateRate, deleteRate,
+  // Quotes
+  getQuotes, getQuote, createQuote, updateQuote, deleteQuote, duplicateQuote,
+  addQuoteItem, updateQuoteItem, removeQuoteItem,
+  // Companies
+  getCompanies, getCompany, createCompany, updateCompany, deleteCompany,
+  // Contacts
+  getContacts, getContact, createContact, updateContact, deleteContact,
+  // Deals
+  getDeals, getDeal, createDeal, updateDeal, deleteDeal,
+  // Activities
+  getActivities, createActivity, updateActivity, deleteActivity,
+  // Dashboard
+  getDashboard,
+} = impl;

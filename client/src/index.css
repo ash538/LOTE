@@ -261,6 +261,280 @@ tr:hover { background: #f8fafc; }
   border-color: #2563eb;
 }
 
+/* Toolbar (search + filters) */
+.toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.search-input {
+  padding: 8px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  min-width: 260px;
+}
+.search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* Lifecycle stage badges */
+.badge-stage-lead { background: #fef3c7; color: #92400e; }
+.badge-stage-prospect { background: #dbeafe; color: #1e40af; }
+.badge-stage-customer { background: #dcfce7; color: #166534; }
+.badge-stage-past_customer { background: #e2e8f0; color: #475569; }
+
+/* Deal stage badges */
+.badge-deal-lead { background: #fef3c7; color: #92400e; }
+.badge-deal-qualified { background: #e0e7ff; color: #3730a3; }
+.badge-deal-proposal { background: #dbeafe; color: #1e40af; }
+.badge-deal-negotiation { background: #fce7f3; color: #9d174d; }
+.badge-deal-won { background: #dcfce7; color: #166534; }
+.badge-deal-lost { background: #fee2e2; color: #991b1b; }
+
+/* Dashboard */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat-tile {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 20px 24px;
+}
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+.stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+.dash-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .dash-columns { grid-template-columns: 1fr; }
+}
+.pipeline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.pipeline-stage {
+  min-width: 120px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+}
+.pipeline-bar-track {
+  flex: 1;
+  height: 14px;
+  background: #f1f5f9;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.pipeline-bar {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 7px;
+  min-width: 2px;
+  transition: width 0.3s;
+}
+.pipeline-value {
+  min-width: 130px;
+  text-align: right;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+.task-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.task-row:last-child { border-bottom: none; }
+.task-meta {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Kanban board */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .kanban { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .kanban { grid-template-columns: 1fr; }
+}
+.kanban-column {
+  background: #eef2f7;
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 300px;
+  border-top: 3px solid #94a3b8;
+}
+.kanban-column.stage-lead { border-top-color: #f59e0b; }
+.kanban-column.stage-qualified { border-top-color: #6366f1; }
+.kanban-column.stage-proposal { border-top-color: #2563eb; }
+.kanban-column.stage-negotiation { border-top-color: #db2777; }
+.kanban-column.stage-won { border-top-color: #16a34a; }
+.kanban-column.stage-lost { border-top-color: #dc2626; }
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.kanban-count {
+  background: white;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.78rem;
+}
+.kanban-total {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 4px 0 10px;
+}
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.deal-card {
+  background: white;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: box-shadow 0.15s;
+}
+.deal-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.deal-amount {
+  font-weight: 700;
+  color: #16a34a;
+  margin-top: 2px;
+}
+.deal-meta {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.kanban-empty {
+  text-align: center;
+  color: #b6c2d1;
+  font-size: 0.82rem;
+  padding: 20px 0;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+}
+
+/* Detail pages */
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .detail-columns { grid-template-columns: 1fr; }
+}
+.detail-row {
+  display: flex;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.92rem;
+  align-items: baseline;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  min-width: 130px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Activity timeline */
+.activity-form {
+  border-bottom: 1.5px solid #e2e8f0;
+  margin-bottom: 16px;
+  padding-bottom: 4px;
+}
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-item.completed .timeline-content strong {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+.timeline-icon {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.timeline-content { flex: 1; }
+.timeline-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.timeline-meta {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+.timeline-body {
+  font-size: 0.88rem;
+  color: #475569;
+  margin-top: 2px;
+  white-space: pre-wrap;
+}
+.btn-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #94a3b8;
+  padding: 0 4px;
+  margin-left: auto;
+}
+.btn-link.danger:hover { color: #dc2626; }
+
 @media print {
   .header, .btn, .no-print { display: none !important; }
   .card { box-shadow: none; border: 1px solid #ddd; }

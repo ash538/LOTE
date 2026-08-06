@@ -8,7 +8,9 @@
     "client": "cd client && npx react-scripts start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npx react-scripts build",
+    "build:demo": "cd client && REACT_APP_DEMO=1 npx react-scripts build",
     "seed": "node server/seed.js",
+    "seed:demo": "node server/seed.js --demo",
     "start": "node server/index.js"
   },
   "dependencies": {

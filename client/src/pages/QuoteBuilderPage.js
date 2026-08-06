@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRates, getCategories, getQuote, createQuote, updateQuote, addQuoteItem, updateQuoteItem, removeQuoteItem } from '../api';
+import { getRates, getCategories, getQuote, createQuote, updateQuote, addQuoteItem, updateQuoteItem, removeQuoteItem, getContacts, getDeals } from '../api';
 
 function AddItemModal({ rates, categories, onAdd, onClose }) {
   const [filter, setFilter] = useState('');
@@ -73,30 +73,54 @@ export default function QuoteBuilderPage() {
   const isNew = !id || id === 'new';
 
   const [quote, setQuote] = useState(null);
-  const [form, setForm] = useState({ client_name: '', client_email: '', client_company: '', notes: '', discount_percent: 0, tax_percent: 0 });
+  const [form, setForm] = useState({ client_name: '', client_email: '', client_company: '', notes: '', discount_percent: 0, tax_percent: 0, contact_id: '', deal_id: '' });
   const [rates, setRates] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [showAddItem, setShowAddItem] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([getRates(), getCategories()]).then(([r, c]) => { setRates(r); setCategories(c); });
+    Promise.all([getRates(), getCategories(), getContacts(), getDeals()]).then(([r, c, ct, d]) => {
+      setRates(r);
+      setCategories(c);
+      setContacts(ct);
+      setDeals(d);
+    });
     if (!isNew) {
       getQuote(id).then(q => {
         setQuote(q);
-        setForm({ client_name: q.client_name, client_email: q.client_email, client_company: q.client_company, notes: q.notes, discount_percent: q.discount_percent, tax_percent: q.tax_percent });
+        setForm({ client_name: q.client_name, client_email: q.client_email, client_company: q.client_company, notes: q.notes, discount_percent: q.discount_percent, tax_percent: q.tax_percent, contact_id: q.contact_id || '', deal_id: q.deal_id || '' });
       });
     }
   }, [id]);
 
+  // Selecting a CRM contact auto-fills the client fields
+  const handleContactSelect = (contactId) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) {
+      setForm({ ...form, contact_id: '' });
+      return;
+    }
+    setForm({
+      ...form,
+      contact_id: contactId,
+      client_name: `${contact.first_name} ${contact.last_name}`.trim(),
+      client_email: contact.email || form.client_email,
+      client_company: contact.company_name || form.client_company,
+    });
+  };
+
   const saveQuoteDetails = async () => {
     setSaving(true);
+    const payload = { ...form, contact_id: form.contact_id || null, deal_id: form.deal_id || null };
     if (isNew) {
-      const created = await createQuote(form);
+      const created = await createQuote(payload);
       navigate(`/quotes/${created.id}`, { replace: true });
       setQuote(created);
     } else {
-      const updated = await updateQuote(id, form);
+      const updated = await updateQuote(id, payload);
       setQuote(updated);
     }
     setSaving(false);
@@ -146,13 +170,35 @@ export default function QuoteBuilderPage() {
               <button className="btn btn-secondary" onClick={() => window.print()}>Print</button>
             </>
           )}
-          <button className="btn btn-secondary" onClick={() => navigate('/')}>Back</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/quotes')}>Back</button>
         </div>
       </div>
 
       {/* Client Details */}
       <div className="card">
         <h3 style={{ marginBottom: 16 }}>Client Details</h3>
+        <div className="row no-print">
+          <div className="form-group">
+            <label>CRM Contact</label>
+            <select value={form.contact_id} onChange={e => handleContactSelect(e.target.value)}>
+              <option value="">— Not linked —</option>
+              {contacts.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.first_name} {c.last_name}{c.company_name ? ` (${c.company_name})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Linked Deal</label>
+            <select value={form.deal_id} onChange={e => setForm({ ...form, deal_id: e.target.value })}>
+              <option value="">— Not linked —</option>
+              {deals.map(d => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="row">
           <div className="form-group">
             <label>Client Name *</label>
