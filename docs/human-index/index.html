@@ -124,6 +124,30 @@
   .srow .lote{font-size:.85rem;color:var(--green);font-weight:600;margin-top:6px}
   .srow .lote .ph{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;color:#fff;background:var(--green);border-radius:6px;padding:2px 7px;margin-right:8px;vertical-align:1px}
   .srow .unsurenote{font-size:.82rem;color:var(--slate);margin-top:6px}
+  .exec{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 24px;margin-top:26px;box-shadow:var(--shadow-lg)}
+  .exec .k{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:10px}
+  .exec p.narr{color:var(--ink-2);font-size:.98rem;max-width:70ch}
+  .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+  .stat{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--cream-2)}
+  .stat .l{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-family:var(--mono);font-weight:600;font-size:1.25rem;color:var(--char);margin-top:4px}
+  .stat .s{font-size:.72rem;color:var(--muted)}
+  .sect{margin-top:40px}
+  .secthead{border-bottom:2px solid var(--char);padding-bottom:8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .secthead h3{font-size:1.2rem}
+  .secthead span{font-size:.8rem;color:var(--muted)}
+  .domblock{margin-top:26px}
+  .domblock .dh{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  .domblock .dh h4{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:-.01em;font-size:1.05rem;color:var(--char)}
+  .domblock .dh .ds{font-family:var(--mono);font-weight:600;color:var(--orange);font-size:.85rem}
+  .domblock .dq{font-size:.85rem;color:var(--muted);margin:2px 0 12px}
+  .domhelp{background:var(--green-soft);border:1px solid var(--green-line);border-radius:14px;padding:14px 16px;font-size:.88rem;color:var(--ink-2);margin-top:2px}
+  .domhelp .hh{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:.78rem;letter-spacing:.06em;color:var(--green);margin-bottom:8px}
+  .domhelp div.svc{margin-top:4px}
+  .domhelp .ph{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;color:#fff;background:var(--green);border-radius:6px;padding:2px 7px;margin-right:8px;vertical-align:1px}
+  .tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:2px 7px;margin-left:8px;vertical-align:2px}
+  .tag.best{background:var(--green-soft);color:var(--green);border:1px solid var(--green-line)}
+  .tag.worst{background:var(--orange-soft);color:var(--orange);border:1px solid var(--orange-line)}
   .cta{margin-top:42px;background:var(--orange-soft);border:1px solid var(--orange-line);border-radius:20px;padding:34px 28px;text-align:center}
   .cta h3{font-size:clamp(1.3rem,3vw,1.8rem);margin-bottom:10px}
   .cta p{color:var(--ink-2);max-width:58ch;margin:0 auto 20px;font-size:.95rem}
@@ -198,11 +222,11 @@
         <p class="sub" id="hsub"></p>
       </div>
       <div class="savestatus" id="savestatus"></div>
+      <div class="exec" id="execsum"></div>
       <div class="doms" id="domcards"></div>
-      <div class="diag" id="diag"></div>
       <div class="unsurebox hide" id="unsurebox"></div>
       <div id="topmoves"></div>
-      <p class="phaselegend">Every next step below is something we deliver, mapped to our HUMAN framework: <b>HEAR</b> listen first &middot; <b>UNCOVER</b> understand why &middot; <b>MAP</b> plan it &middot; <b>ACTIVATE</b> deliver it &middot; <b>NURTURE</b> make it last.</p>
+      <p class="phaselegend">Next steps are mapped to our HUMAN framework: <b>HEAR</b> listen first &middot; <b>UNCOVER</b> understand why &middot; <b>MAP</b> plan it &middot; <b>ACTIVATE</b> deliver it &middot; <b>NURTURE</b> make it last.</p>
       <div id="streamresults"></div>
       <div class="cta">
         <h3>The score is the start. The next steps are the work.</h3>
@@ -529,11 +553,15 @@ function recordResponse(sScores,dScores,hxi,band,unsure){
     fetch(SHEETS_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body})
       .then(function(r){
         if(!r.ok)throw new Error("HTTP "+r.status);
+        return r.json();
+      })
+      .then(function(j){
+        if(!j||j.ok!==true)throw new Error(j&&j.error?j.error:"The recorder script reported a failure.");
         submitted=true;s.textContent="Response recorded ✓";s.className="savestatus ok";
       })
-      .catch(function(){
+      .catch(function(e){
         if(attempt<2){setTimeout(function(){send(attempt+1)},2000);}
-        else{s.textContent="We couldn’t record your response automatically. Your results are still shown — please screenshot this page and send it to your coordinator.";s.className="savestatus err";}
+        else{s.textContent="We couldn’t record your response automatically ("+((e&&e.message)||"network error")+"). Your results are still shown — please screenshot this page and send it to your coordinator.";s.className="savestatus err";}
       });
   }
   send(0);
@@ -562,40 +590,77 @@ function results(){
   el("hxi").textContent=hxi.toFixed(1);
   el("hband").textContent=band;
   el("hsub").textContent=BANDBLURB[band];
-  el("domcards").innerHTML=doms.map(function(d,i){
-    return '<div class="dom-card"><div class="n">'+d+'</div><div class="v">'+dScores[i].toFixed(1)+'</div><div class="b">'+bandOf(dScores[i])+'</div><div class="track"><i style="width:'+dScores[i]+'%"></i></div></div>';}).join("");
-  el("diag").innerHTML='<span>Start with: <b>'+weakest+'</b>. Your weakest area holds the others back, so lifting it releases the most value.</span>';
+
+  // Domain ranking: best first
+  var rank=doms.map(function(d,i){return i}).sort(function(a,b){return dScores[b]-dScores[a]});
+  var bi=rank[0],wi=rank[rank.length-1];
+  var confident=16-unsure;
+
+  // Executive summary: the board view
+  var narr=(participant.org||"Your organisation")+" records an overall HUMAN Maturity Index of "+hxi.toFixed(1)+" out of 100, placing it in the "+band+" band. "+
+    doms[bi]+" is the strongest domain at "+dScores[bi].toFixed(1)+"; "+doms[wi]+" is the weakest at "+dScores[wi].toFixed(1)+
+    " and is the binding constraint on the overall score — the index rewards balance, so lifting the weakest domain releases the most value. ";
+  if(dScores[bi]-dScores[wi]>=25)narr+="Performance is markedly uneven across the four domains, which suggests effort is concentrated in pockets rather than embedded organisation-wide. ";
+  else narr+="Performance is broadly consistent across the four domains. ";
+  if(unsure>0)narr+=unsure+" of 16 checks could not be answered with confidence. That is a finding in its own right: capability that is not visible to the people answering is unlikely to be operating systematically.";
+  else narr+="All 16 checks were answered with confidence, so this picture can be read as a reliable self-assessment.";
+  el("execsum").innerHTML='<div class="k">Executive summary · The board view</div><p class="narr">'+narr+'</p>'+
+    '<div class="statrow">'+
+    '<div class="stat"><div class="l">Overall index</div><div class="v">'+hxi.toFixed(1)+'</div><div class="s">'+band+'</div></div>'+
+    '<div class="stat"><div class="l">Strongest domain</div><div class="v">'+dScores[bi].toFixed(1)+'</div><div class="s">'+doms[bi]+'</div></div>'+
+    '<div class="stat"><div class="l">Priority domain</div><div class="v">'+dScores[wi].toFixed(1)+'</div><div class="s">'+doms[wi]+'</div></div>'+
+    '<div class="stat"><div class="l">Answered with confidence</div><div class="v">'+confident+'/16</div><div class="s">'+(unsure>0?unsure+' unknown':'complete picture')+'</div></div>'+
+    '</div>';
+
+  el("domcards").innerHTML=rank.map(function(i,pos){
+    var tag=pos===0?'<span class="tag best">Strongest</span>':(i===wi?'<span class="tag worst">Priority</span>':'');
+    return '<div class="dom-card"><div class="n">'+doms[i]+tag+'</div><div class="v">'+dScores[i].toFixed(1)+'</div><div class="b">'+bandOf(dScores[i])+'</div><div class="track"><i style="width:'+dScores[i]+'%"></i></div></div>';}).join("");
+
   if(unsure>0){
     el("unsurebox").classList.remove("hide");
     el("unsurebox").innerHTML='<b>You answered "I honestly don’t know" '+unsure+(unsure===1?' time':' times')+'.</b> That is a finding in itself: if nobody in the room knows, it is probably not happening in any organised way. For those areas, the first step is simply finding out, and we have marked them below.';
   }
+
   // top three moves: lowest streams, weakest domain first on ties
   var order=STREAMS.map(function(s,i){return i}).sort(function(a,b){
     var da=doms.indexOf(STREAMS[a].d),db=doms.indexOf(STREAMS[b].d);
     return (sScores[a]-sScores[b])||(dScores[da]-dScores[db]);});
   var top3=order.slice(0,3);
-  el("topmoves").innerHTML='<h3 class="movehead">Start here: your three biggest moves</h3>'+top3.map(function(i,rank){
+  el("topmoves").innerHTML='<h3 class="movehead">Start here: your three biggest moves</h3>'+top3.map(function(i,rank2){
     var s=STREAMS[i],sc=sScores[i],b=Math.min(Math.floor(sc/20)*20,80)/20;
     var un=stopReason(answers[i])==="unsure";
-    return '<div class="move"><div class="mrank">'+(rank+1)+'</div><div class="mbody">'+
+    return '<div class="move"><div class="mrank">'+(rank2+1)+'</div><div class="mbody">'+
       '<div class="mname">'+s.n+' <span class="msc">'+sc+' out of 100</span></div>'+
       '<div class="msaid">'+youSaid(i)+'</div>'+
       (un?'<div class="unsurenote">If nobody knows, it is probably not happening. Step one is finding out:</div>':'')+
       '<div class="next"><b>Your next step:</b> '+s.s[b]+'</div>'+
-      '<div class="lote"><span class="ph">'+s.p[b]+'</span>How we can help: '+s.t[b]+'</div>'+
       '</div></div>';}).join("");
-  el("streamresults").innerHTML='<h3 class="movehead" style="margin-top:34px">The full picture</h3>'+doms.map(function(d){
-    var rows=STREAMS.map(function(s,i){
-      if(s.d!==d)return "";
-      var sc=sScores[i],b=Math.min(Math.floor(sc/20)*20,80)/20;
+
+  // Domain deep-dive, split into priorities and strengths.
+  function domBlock(di){
+    var d=doms[di];
+    var idx=[];STREAMS.forEach(function(s,i){if(s.d===d)idx.push(i)});
+    var rows=idx.map(function(i){
+      var s=STREAMS[i],sc=sScores[i],b=Math.min(Math.floor(sc/20)*20,80)/20;
       var un=stopReason(answers[i])==="unsure";
       return '<div class="srow"><div class="top"><span class="nm">'+s.n+'</span><span class="sc">'+sc+' · '+bandOf(sc)+'</span></div>'+
         '<div class="track"><i style="width:'+Math.max(sc,2)+'%"></i></div>'+
-        '<div class="msaid">'+youSaid(i)+'</div>'+
-        (un?'<div class="unsurenote">Nobody was sure here. Step one is finding out:</div>':'')+
-        '<div class="next"><b>Your next step:</b> '+s.s[b]+'</div>'+
-        '<div class="lote"><span class="ph">'+s.p[b]+'</span>How we can help: '+s.t[b]+'</div></div>';}).join("");
-    return '<div class="res-dom"><h3>'+d+' <span>'+DOMQ[d]+'</span></h3>'+rows+'</div>';}).join("");
+        (un?'<div class="unsurenote">Nobody was sure here. Step one is finding out.</div>':'')+
+        '<div class="next"><b>Next step:</b> '+s.s[b]+'</div></div>';}).join("");
+    // How we can help: one section per domain, driven by its two lowest streams
+    var low=idx.slice().sort(function(a,b){return sScores[a]-sScores[b]}).slice(0,2);
+    var help=low.map(function(i){
+      var s=STREAMS[i],b=Math.min(Math.floor(sScores[i]/20)*20,80)/20;
+      return '<div class="svc"><span class="ph">'+s.p[b]+'</span>'+s.t[b]+' <span style="color:var(--muted)">— '+s.n.toLowerCase()+'</span></div>';}).join("");
+    return '<div class="domblock"><div class="dh"><h4>'+d+'</h4><span class="ds">'+dScores[di].toFixed(1)+' · '+bandOf(dScores[di])+'</span></div>'+
+      '<div class="dq">'+DOMQ[d]+'</div>'+rows+
+      '<div class="domhelp"><div class="hh">How LOTE can help on '+d+'</div>'+help+'</div></div>';
+  }
+  var priorities=rank.slice().reverse().slice(0,2);
+  var strengths=rank.slice(0,2);
+  el("streamresults").innerHTML=
+    '<div class="sect"><div class="secthead"><h3>Where the work is</h3><span>Your two weakest domains — fix these first</span></div>'+priorities.map(domBlock).join("")+'</div>'+
+    '<div class="sect"><div class="secthead"><h3>Where you are strongest</h3><span>Protect and build on these</span></div>'+strengths.map(domBlock).join("")+'</div>';
   el("results").classList.remove("hide");
   window.scrollTo(0,0);
 }
