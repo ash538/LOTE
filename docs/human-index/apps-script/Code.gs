@@ -57,7 +57,24 @@ function doPost(e) {
 }
 
 // Visiting the /exec URL in a browser confirms the deployment is alive.
-function doGet() {
+// Adding ?selftest=1 writes a SELF-TEST row to the Sheet, proving the full
+// write path works without completing the assessment.
+function doGet(e) {
+  if (e && e.parameter && e.parameter.selftest === "1") {
+    try {
+      var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(headers_());
+        sheet.setFrozenRows(1);
+      }
+      var row = headers_().map(function (h, i) { return i === 0 ? new Date() : (i === 1 ? "SELF-TEST" : ""); });
+      sheet.appendRow(row);
+      return json_({ ok: true, message: "Self-test row written to the Sheet. You can delete it any time." });
+    } catch (err) {
+      return json_({ ok: false, error: String(err) });
+    }
+  }
   return json_({ ok: true, message: "HUMAN Maturity Index recorder is running. Responses are POSTed here by the tool." });
 }
 
