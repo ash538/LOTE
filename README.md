@@ -1,5 +1,7 @@
 # LOTE Quote Builder
 
+> Also in this repo: the **HUMAN Maturity Index** self-assessment tool with Google Sheets response recording lives in [`docs/human-index/`](docs/human-index/) — see its [SETUP.md](docs/human-index/SETUP.md) to connect it to a Sheet.
+
 Online quote builder with backend rates for team use. Build professional quotes by selecting services from a managed rate card.
 
 ## Features

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The HUMAN Maturity Index | The LOTE Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* CMS type: human_index_tool
+     fields: eyebrow, heading, subheading, formula_line, cta_url,
+             streams[]{ code, name, domain, statements[5], next_steps[5], services[5], phases[5] } */
+  :root{
+    --cream:#F7F3EB; --cream-2:#FBF8F2; --panel:#FFFFFF;
+    --char:#26231F; --ink:#2B2823; --ink-2:#4A453E; --muted:#8C8478; --faint:#B6AE9F;
+    --line:#E7DFD2; --line-2:#EFE9DD;
+    --orange:#D5612A; --orange-soft:#FBEADE; --orange-line:#F2CBAE;
+    --green:#4F7A53; --green-soft:#E7F0E5; --green-line:#C5DAC2;
+    --amber:#C0872B; --amber-soft:#F8EFD9; --amber-line:#EAD6A8;
+    --slate:#5A6B7A; --slate-soft:#E8EDF1;
+    --shadow:0 1px 2px rgba(38,35,31,.04),0 8px 24px rgba(38,35,31,.06);
+    --shadow-lg:0 2px 4px rgba(38,35,31,.05),0 18px 48px rgba(38,35,31,.10);
+    --display:"Bricolage Grotesque",-apple-system,system-ui,sans-serif;
+    --body:"Inter",-apple-system,system-ui,sans-serif;
+    --mono:"Spline Sans Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--cream);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;display:inline-flex;align-items:center;gap:.6em;color:var(--orange)}
+  .eyebrow::before{content:"";width:26px;height:2px;background:currentColor;display:inline-block}
+  h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.05;letter-spacing:-.01em;text-transform:uppercase;color:var(--char)}
+  .tool{padding:64px 0 96px}
+  button{font-family:var(--body);cursor:pointer;border:none}
+  .btn{background:var(--char);color:#fff;font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;padding:15px 32px;border-radius:100px;transition:background .15s ease,transform .15s ease}
+  .btn:hover{background:var(--orange);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;color:var(--muted);padding-left:0}
+  .btn.ghost:hover{color:var(--char);background:transparent}
+  .btn:focus-visible,.opt:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+  #intro h1{font-size:clamp(2.1rem,5.6vw,3.5rem);margin:16px 0 18px}
+  #intro .formula{font-family:var(--mono);font-weight:600;color:var(--orange);font-size:clamp(.92rem,2.2vw,1.1rem);margin-bottom:18px}
+  #intro p.lead{color:var(--ink-2);font-size:1.08rem;max-width:62ch;margin-bottom:14px}
+  .domchips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:28px 0 34px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:.88rem;box-shadow:var(--shadow)}
+  .chip b{display:block;font-family:var(--display);font-weight:700;text-transform:uppercase;color:var(--orange);font-size:.82rem;letter-spacing:.06em;margin-bottom:2px}
+  .chip span{color:var(--muted)}
+
+  .aboutcard{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;margin:0 0 26px;box-shadow:var(--shadow)}
+  .aboutcard h3{font-size:1rem;margin-bottom:4px}
+  .aboutcard p{font-size:.85rem;color:var(--muted);margin-bottom:16px}
+  .fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .field input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:var(--body);font-size:.95rem;color:var(--ink);background:var(--cream-2)}
+  .field input:focus{outline:2px solid var(--orange);outline-offset:1px;border-color:var(--orange-line)}
+  .field .req{color:var(--orange)}
+  .field-err{font-size:.8rem;color:#C0392B;margin-top:10px;display:none}
+  .savestatus{font-family:var(--mono);font-size:.78rem;margin-top:14px;text-align:center;color:var(--muted)}
+  .savestatus.ok{color:var(--green)}
+  .savestatus.err{color:#C0392B}
+
+  .prog{position:sticky;top:0;background:var(--cream);padding:16px 0 12px;z-index:5;border-bottom:1px solid var(--line-2)}
+  .prog .meta{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .prog .bar{height:6px;background:var(--line);border-radius:100px;overflow:hidden}
+  .prog .fill{height:100%;background:var(--orange);width:0%;transition:width .3s ease;border-radius:100px}
+
+  .stream-head{margin:28px 0 20px}
+  .stream-head .dom{color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .stream-head h2{font-size:clamp(1.4rem,3.4vw,2rem);margin-top:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 24px;box-shadow:var(--shadow-lg)}
+  .card .glabel{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:10px}
+  .card .q{font-family:var(--display);font-weight:700;font-size:clamp(1.15rem,3vw,1.55rem);line-height:1.25;color:var(--char);margin-bottom:22px;letter-spacing:-.01em;text-transform:none}
+  .card .opts{display:flex;flex-direction:column;gap:10px}
+  .card .opt{width:100%;text-align:left;font-size:1rem;padding:15px 20px;border-radius:14px;background:var(--cream-2);border:1px solid var(--line);color:var(--ink-2);font-weight:600;transition:all .15s ease}
+  .card .lad{display:flex;gap:12px;align-items:flex-start}
+  .card .lad:hover{background:var(--green-soft);border-color:var(--green-line)}
+  .card .lad .lvl{font-family:var(--mono);font-weight:600;font-size:.72rem;color:var(--orange);border:1px solid var(--orange-line);border-radius:8px;padding:3px 7px;flex-shrink:0;margin-top:2px}
+  .card .lad-none:hover{background:var(--orange-soft);border-color:var(--orange-line)}
+  .card .lad-unsure:hover{background:var(--slate-soft);border-color:var(--slate)}
+  .card .lad-none,.card .lad-unsure{font-size:.9rem;color:var(--muted)}
+  .card .hint{font-size:.8rem;color:var(--muted);margin-top:18px}
+  .dots{display:flex;gap:6px;margin-bottom:16px}
+  .dots i{width:26px;height:5px;border-radius:100px;background:var(--line)}
+  .dots i.on{background:var(--green)}
+  .dots i.cur{background:var(--orange)}
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+  .lastdone{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+
+  .score-hero{background:var(--char);color:#fff;border-radius:22px;text-align:center;padding:44px 26px;margin-top:26px}
+  .score-hero .big{font-family:var(--display);font-weight:800;font-size:clamp(4rem,12vw,6.5rem);line-height:1;color:var(--orange)}
+  .score-hero .band{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:1.3rem;letter-spacing:.04em;margin-top:6px}
+  .score-hero .sub{color:rgba(255,255,255,.72);max-width:52ch;margin:14px auto 0;font-size:.98rem}
+  .doms{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0 6px}
+  .dom-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+  .dom-card .n{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange)}
+  .dom-card .v{font-family:var(--mono);font-weight:600;font-size:1.7rem;color:var(--char);margin:6px 0 0}
+  .dom-card .b{font-size:.78rem;color:var(--muted);margin-bottom:10px}
+  .dom-card .track{height:6px;background:var(--line);border-radius:100px;overflow:hidden}
+  .dom-card .track i{display:block;height:100%;background:var(--orange);border-radius:100px}
+  .diag{display:flex;gap:22px;flex-wrap:wrap;margin:16px 0 8px;color:var(--ink-2);font-size:.9rem}
+  .diag b{color:var(--char)}
+  .unsurebox{background:var(--slate-soft);border:1px solid var(--slate);border-radius:14px;padding:14px 16px;font-size:.9rem;color:var(--ink-2);margin:8px 0 26px}
+  .phaselegend{font-size:.8rem;color:var(--muted);margin:4px 0 26px}
+  .phaselegend b{color:var(--orange);font-family:var(--mono);font-size:.72rem;letter-spacing:.06em}
+  .movehead{font-size:1.25rem;color:var(--char);margin:30px 0 14px}
+  .move{display:flex;gap:16px;background:var(--panel);border:2px solid var(--orange-line);border-radius:18px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow-lg)}
+  .mrank{font-family:var(--display);font-weight:800;font-size:1.6rem;color:#fff;background:var(--orange);border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mname{font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--char);margin-bottom:6px}
+  .msc{font-family:var(--mono);font-weight:600;font-size:.8rem;color:var(--orange);margin-left:8px}
+  .msaid{font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:8px}
+  .move .next{margin-top:2px}
+  .res-dom{margin-top:32px}
+  .res-dom h3{font-size:1.15rem;color:var(--char);margin-bottom:12px}
+  .res-dom h3 span{color:var(--muted);font-family:var(--body);font-weight:500;text-transform:none;font-size:.9rem;letter-spacing:0}
+  .srow{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .srow .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .srow .nm{font-weight:600;color:var(--char)}
+  .srow .sc{font-family:var(--mono);font-weight:600;color:var(--orange)}
+  .srow .track{height:5px;background:var(--line);border-radius:100px;overflow:hidden;margin:9px 0 10px}
+  .srow .track i{display:block;height:100%;background:var(--orange);border-radius:100px}
+  .srow .next{font-size:.9rem;color:var(--ink-2)}
+  .srow .next b{color:var(--char);font-weight:600}
+  .srow .lote{font-size:.85rem;color:var(--green);font-weight:600;margin-top:6px}
+  .srow .lote .ph{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;color:#fff;background:var(--green);border-radius:6px;padding:2px 7px;margin-right:8px;vertical-align:1px}
+  .srow .unsurenote{font-size:.82rem;color:var(--slate);margin-top:6px}
+  .cta{margin-top:42px;background:var(--orange-soft);border:1px solid var(--orange-line);border-radius:20px;padding:34px 28px;text-align:center}
+  .cta h3{font-size:clamp(1.3rem,3vw,1.8rem);margin-bottom:10px}
+  .cta p{color:var(--ink-2);max-width:58ch;margin:0 auto 20px;font-size:.95rem}
+  .hide{display:none}
+  @media(max-width:720px){.doms{grid-template-columns:repeat(2,1fr)}.tool{padding:44px 0 72px}.domchips{grid-template-columns:1fr}.fieldgrid{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<section class="tool">
+  <div class="wrap">
+
+    <!-- INTRO -->
+    <div id="intro">
+      <span class="eyebrow">The HUMAN Maturity Index</span>
+      <h1>How well does your organisation work with multicultural communities?</h1>
+      <p class="formula">Human Experience = Knowledge &times; Capability, carried by Capacity and Trust</p>
+      <p class="lead">A quick note on words: when we say communities in this check, we mean multicultural communities and audiences: people who speak a language other than English, migrants and refugees, and culturally diverse customers and staff.</p>
+      <p class="lead">Sixteen quick checks across your whole organisation, from research and translations to budgets, hiring, leadership and community relationships. For each one, we show you five statements, from first steps to best practice. Just pick the strongest one that is honestly true of you today.</p>
+      <p class="lead">One choice per check, sixteen taps in all. Most people finish in about 3 minutes. Answer for how things are today, not how you would like them to be. And if you honestly do not know, say so: not knowing is an answer too, and often the most useful one.</p>
+      <div class="domchips">
+        <div class="chip"><b>Knowledge</b><span>What do we know about our communities?</span></div>
+        <div class="chip"><b>Capability</b><span>Can we deliver work that works for them?</span></div>
+        <div class="chip"><b>Capacity</b><span>Do we have the money, people and systems?</span></div>
+        <div class="chip"><b>Trust</b><span>Do communities, and our own staff, trust us?</span></div>
+      </div>
+      <div class="aboutcard" id="aboutyou">
+        <h3>Before you start</h3>
+        <p>Your answers are recorded so your team can look at the results together. Only your name is required.</p>
+        <div class="fieldgrid">
+          <div class="field"><label for="f_name">Name <span class="req">*</span></label><input id="f_name" type="text" autocomplete="name"></div>
+          <div class="field"><label for="f_email">Work email (optional)</label><input id="f_email" type="email" autocomplete="email"></div>
+          <div class="field"><label for="f_team">Team or role (optional)</label><input id="f_team" type="text"></div>
+          <div class="field"><label for="f_store">Store / site / location (optional)</label><input id="f_store" type="text"></div>
+        </div>
+        <div class="field-err" id="fielderr">Please enter your name before starting.</div>
+      </div>
+      <button class="btn" id="startbtn">Start the check</button>
+    </div>
+
+    <!-- ASSESSMENT -->
+    <div id="assess" class="hide">
+      <div class="prog">
+        <div class="meta"><span id="pmeta"></span><span id="pcount"></span></div>
+        <div class="bar"><div class="fill" id="pfill"></div></div>
+      </div>
+      <div class="stream-head">
+        <div class="dom" id="sdom"></div>
+        <h2 id="sname"></h2>
+      </div>
+      <div class="card" id="card">
+        <div class="q">Pick the strongest statement that is honestly true of you today.</div>
+        <div class="opts" id="ladder"></div>
+        <div class="opts" style="margin-top:12px">
+          <button class="opt lad-none" id="optnone">None of these yet</button>
+          <button class="opt lad-unsure" id="optunsure">Honestly don&#8217;t know</button>
+        </div>
+        <div class="hint">Each statement builds on the ones before it. "None of these yet" is not a fail: it just tells us where your first step is, and we will name it in your results.</div>
+      </div>
+      <div class="nav">
+        <button class="btn ghost" id="backbtn">Back</button>
+        <span class="lastdone" id="lastdone"></span>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results" class="hide">
+      <span class="eyebrow">Your results</span>
+      <div class="score-hero">
+        <div class="big" id="hxi"></div>
+        <div class="band" id="hband"></div>
+        <p class="sub" id="hsub"></p>
+      </div>
+      <div class="savestatus" id="savestatus"></div>
+      <div class="doms" id="domcards"></div>
+      <div class="diag" id="diag"></div>
+      <div class="unsurebox hide" id="unsurebox"></div>
+      <div id="topmoves"></div>
+      <p class="phaselegend">Every next step below is something we deliver, mapped to our HUMAN framework: <b>HEAR</b> listen first &middot; <b>UNCOVER</b> understand why &middot; <b>MAP</b> plan it &middot; <b>ACTIVATE</b> deliver it &middot; <b>NURTURE</b> make it last.</p>
+      <div id="streamresults"></div>
+      <div class="cta">
+        <h3>The score is the start. The next steps are the work.</h3>
+        <p>This quick check scores your answers, not your evidence. The full HUMAN Maturity Index is run with LOTE assessors, checked against proof, and compared with other organisations. Behind every next step above is a LOTE service: 28 years of practice, a 14,000-member in-language research panel across 34 language groups, 350+ bilingual advisors, and NAATI-certified translation in 150+ languages.</p>
+        <button class="btn" id="ctabtn">Talk to us about your results</button>
+      </div>
+      <div style="text-align:center;margin-top:20px"><button class="btn ghost" id="restartbtn">Start again</button></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+window.onerror=function(msg,url,line,col){
+  var b=document.createElement("div");
+  b.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#C0392B;color:#fff;padding:10px 14px;font:12px monospace;z-index:99";
+  b.textContent="Error: "+msg+" (line "+line+":"+(col||"?")+")";
+  document.body.appendChild(b);
+};
+
+/* ===== Google Sheets recording =====
+   Every completed check is POSTed to a Google Apps Script web app that
+   appends one row per response to a Google Sheet (see apps-script/Code.gs
+   and SETUP.md in this folder).
+   1. Deploy apps-script/Code.gs as a web app (Execute as: Me, Access: Anyone).
+   2. Paste the deployment's /exec URL below. */
+var SHEETS_ENDPOINT="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+var TOOL_VERSION="v7.3";
+var DEFAULT_ORG="Woolworths"; // override per-link with ?org=Some%20Org
+var ORG=(function(){var m=/[?&]org=([^&]+)/.exec(window.location.search);return m?decodeURIComponent(m[1].replace(/\+/g," ")):DEFAULT_ORG;})();
+
+var DOMQ={Knowledge:"What do we know about our communities?",Capability:"Can we deliver work that works for them?",Capacity:"Do we have the money, people and systems?",Trust:"Do communities, and our own staff, trust us?"};
+var BANDS=[[80,"Leading"],[60,"Embedded"],[40,"Developing"],[20,"Emerging"],[0,"Just starting"]];
+var BANDBLURB={
+ "Just starting":"This work is not really underway yet, and that is fine: everyone starts somewhere. The first steps below are small, quick and affordable.",
+ "Emerging":"There are good intentions and first efforts, but they are scattered and mostly unfunded. The next steps turn goodwill into something solid.",
+ "Developing":"Real work is happening. The job now is to make it stick: budgets, systems and relationships that do not depend on one keen person.",
+ "Embedded":"This is part of how your organisation runs, with money, measurement and real relationships behind it. The climb from here is about sharing power.",
+ "Leading":"You are ahead of the pack. The frontier now is communities sharing in decisions, and helping other organisations get where you are."};
+
+var STREAMS=[
+{c:"K1",n:"Knowing your communities",d:"Knowledge",
+ g:["We know which multicultural communities and languages are in our area or customer base.",
+    "We have asked these communities directly, in their own languages, what they think of us and what gets in their way.",
+    "We have sat down with community members to understand the reasons behind the numbers.",
+    "We keep researching: we check back regularly and test things with communities before launching them.",
+    "Communities help decide what we research, and we share what we learn with them."],
+ s:["Find out who your communities are: a simple profile of which communities, which languages, and where.",
+    "Survey your communities in their own languages: what they think, what gets in their way.",
+    "Talk to community members in depth: small groups, real conversations, in language.",
+    "Make research regular: check back each year and test campaigns before they launch.",
+    "Share the research with communities and let them shape what you study next."],
+ t:["Community profile built with our Language Tool and Census data","A Community Pulse survey: our in-language panel of 14,000 people across 34 language groups","Focus groups and interviews run by our bilingual advisors","Yearly tracking and campaign testing through Community Pulse","A community-led research program"],
+ p:["HEAR","HEAR","UNCOVER","UNCOVER","NURTURE"]},
+{c:"K2",n:"What your systems can see",d:"Knowledge",
+ g:["Our systems record what language a customer prefers.",
+    "We ask people their preferred language when they first deal with us.",
+    "We can pull a report showing our customers by language or community.",
+    "Our leaders regularly see how different communities are experiencing our services.",
+    "Our data warns us when a community is missing out, before they complain."],
+ s:["Check what your systems can and cannot record about language.",
+    "Start asking people their preferred language at sign-up and first contact.",
+    "Set up simple reporting by language and community.",
+    "Put community numbers in front of your leaders every quarter.",
+    "Use your data to spot gaps early, before they become complaints."],
+ t:["A data and systems review","Data collection design, with respectful wording your staff can use","A simple dashboard build","A quarterly reporting framework","Service gap analysis"],
+ p:["HEAR","MAP","MAP","NURTURE","NURTURE"]},
+{c:"K3",n:"Using what communities tell you",d:"Knowledge",
+ g:["Our decision makers have seen multicultural research in the past year and made decisions based on it.",
+    "When we plan something for communities, the plan has to include what communities told us.",
+    "A plan will not get approved here without community input behind it.",
+    "We check our assumptions with communities before spending big money.",
+    "We look back at decisions to see if they worked for communities, and change how we decide."],
+ s:["Brief your leaders on what communities are actually saying.",
+    "Add a 'what communities told us' section to your planning templates.",
+    "Make community input a condition of approval for community-facing work.",
+    "Test your big assumptions with communities before the money moves.",
+    "Review past decisions against how they worked for communities."],
+ t:["An executive insight briefing","Template and planning process design","Decision process design","Quick-turnaround testing through Community Pulse","A decision review and learning cycle"],
+ p:["HEAR","MAP","MAP","UNCOVER","NURTURE"]},
+{c:"K4",n:"Measuring your progress",d:"Knowledge",
+ g:["We know our starting point: we have measured how ready we are for this work.",
+    "We report simple numbers by community: who we reached, in what language.",
+    "We have agreed what success looks like for communities and how to measure it.",
+    "We re-measure every year and report progress to our leaders or board.",
+    "We compare our results with other organisations."],
+ s:["Get your baseline: measure where you are right now.",
+    "Start counting: reach and spend by language, every quarter.",
+    "Agree what success looks like and how you will measure it.",
+    "Re-measure every year and report the movement.",
+    "Compare yourself with the sector."],
+ t:["The full HUMAN Maturity Assessment, the evidence-based version of this tool","A simple reach and spend dashboard","A measurement framework and Theory of Change","A yearly reassessment and progress report","A sector benchmark from our client dataset"],
+ p:["HEAR","MAP","MAP","NURTURE","NURTURE"]},
+{c:"C1",n:"Speaking people's languages",d:"Capability",
+ g:["Our most important information is professionally translated, and community members have checked it makes sense.",
+    "Our everyday materials are written in plain English that is easy to understand.",
+    "We cover our main community languages, and people can easily get an interpreter when dealing with us.",
+    "Nothing goes out to a community without someone from that community checking it first.",
+    "People get the same information at the same time, whether they read English or not."],
+ s:["Translate your most important document properly, and have community members check it.",
+    "Rewrite your key materials in plain English, with Easy English versions where needed.",
+    "Work out your priority languages and make interpreters easy to reach.",
+    "Have community members review everything before it goes out.",
+    "Publish in language at the same time as English, every channel."],
+ t:["NAATI-certified translation in 150+ languages, checked by community","A plain language and accessibility review","A language services plan: which languages, what gets translated, how interpreting works","A bilingual advisor review panel","A multilingual publishing operation"],
+ p:["ACTIVATE","ACTIVATE","MAP","ACTIVATE","NURTURE"]},
+{c:"C2",n:"Marketing that reaches everyone",d:"Capability",
+ g:["We know whether people from different communities actually see themselves in our advertising.",
+    "We have run at least one campaign in community languages through community media.",
+    "Community media and channels are part of every relevant campaign we plan.",
+    "We test our ads with communities before spending money on them.",
+    "Communities help create our campaigns with us."],
+ s:["Take stock: who appears in your advertising, and where your media money goes.",
+    "Run your first campaign in community languages through community media.",
+    "Put community channels into every campaign plan and budget.",
+    "Test your creative with communities before you spend on media.",
+    "Create campaigns with communities, not just for them."],
+ t:["A brand and channel review","A campaign through our ethnic media network, community events and trusted community voices","Multicultural media planning","Concept testing with our Community Pulse panel","A community co-creation program"],
+ p:["HEAR","ACTIVATE","MAP","UNCOVER","NURTURE"]},
+{c:"C3",n:"Services that work for everyone",d:"Capability",
+ g:["We know where people from different communities give up or drop out of our services.",
+    "We have fixed the biggest problem points, and interpreters are available at the moments that matter.",
+    "We have designed at least one service together with community members.",
+    "New services have to work for all communities before they get approved.",
+    "The gaps between communities are shrinking, and we can prove it."],
+ s:["Find out where people give up: map the experience through their eyes.",
+    "Fix the worst problem points first, starting where interpreters are missing.",
+    "Design one service with community members at the table from day one.",
+    "Make 'works for all communities' a rule for anything new.",
+    "Track the gaps between communities and close them."],
+ t:["Customer experience mapping with communities","Service redesign with interpreting built in","Co-design workshops run with our bilingual advisors","Inclusive design standards for your approval process","Equity gap measurement"],
+ p:["UNCOVER","ACTIVATE","ACTIVATE","MAP","NURTURE"]},
+{c:"C4",n:"Skilling up your people",d:"Capability",
+ g:["Staff who deal with communities have been trained in how to do it well, within the past year.",
+    "Most teams, not just the frontline, have had some of this training.",
+    "Different roles get training that fits their job: frontline, marketing, managers.",
+    "This training is part of induction and job expectations, and gets refreshed.",
+    "We have our own in-house experts who train others."],
+ s:["Train the teams who deal with communities first.",
+    "Extend the training beyond the frontline.",
+    "Give each team training that fits their actual job.",
+    "Build it into induction and job descriptions so it sticks.",
+    "Grow your own trainers so the expertise stays."],
+ t:["LOTE Academy foundation training and masterclasses","A training rollout across your teams","LOTE Academy role-based modules","Curriculum built into your induction and HR cycle","Train-the-trainer accreditation"],
+ p:["ACTIVATE","ACTIVATE","ACTIVATE","NURTURE","NURTURE"]},
+{c:"Y1",n:"A real plan with a real owner",d:"Capacity",
+ g:["Someone, a person or a team, owns this work as part of their job, not as a volunteer side task.",
+    "We have a multicultural strategy, and a senior leader champions it.",
+    "That strategy is part of our main business plan, with money and targets attached.",
+    "Our board hears how this work is going, and leaders are accountable for it.",
+    "Thinking about communities shapes our biggest business decisions."],
+ s:["Give this work an owner: a person or team with time in their week for it.",
+    "Build your multicultural strategy, with a senior leader behind it.",
+    "Put the strategy into the business plan, with budget and targets.",
+    "Report progress to the board and make leaders accountable.",
+    "Let communities shape the big decisions, not just the communications."],
+ t:["Help defining the role and making the case","A multicultural strategy built through our HUMAN framework","A strategy integration workshop","A board reporting framework","An ongoing strategic advisory partnership"],
+ p:["HEAR","MAP","MAP","NURTURE","NURTURE"]},
+{c:"Y2",n:"Money and machinery",d:"Capacity",
+ g:["There is a dedicated budget for this work each year, even a modest one.",
+    "Staff know how to get something translated, and we never pay twice for the same translation.",
+    "This work is planned and budgeted every year, with written processes.",
+    "This work would keep running if a key person left tomorrow.",
+    "We fund community organisations to do some of this work with us."],
+ s:["Get a budget line, even a small one, and use it.",
+    "Set up the basics: a simple way for staff to request translations, and a translation memory so you never pay twice.",
+    "Plan and budget it every year, and write the process down.",
+    "Make it survive staff changes: document it and build a handover.",
+    "Fund community partners directly, not just through projects."],
+ t:["A business case with benchmark costs","A translation workflow with translation memory and glossaries","An operations playbook","Documentation and handover design","A community partner investment model"],
+ p:["MAP","ACTIVATE","MAP","NURTURE","NURTURE"]},
+{c:"Y3",n:"Your own workforce",d:"Capacity",
+ g:["We know which languages our staff speak.",
+    "Staff who help with language at work are recognised and paid for it, not used as free interpreters.",
+    "We actively hire for cultural skills and diverse backgrounds.",
+    "Our staff, including managers, reflect the communities we serve, and we report on it.",
+    "Cultural knowledge is treated as real expertise here, with career paths and pay to match."],
+ s:["Find out which languages your staff speak.",
+    "Recognise and pay staff who use their languages at work.",
+    "Hire for cultural skills on purpose, not by accident.",
+    "Set targets so your team reflects your community, at every level.",
+    "Make cultural expertise a career, not a favour."],
+ t:["A workforce language audit","Language allowance design, with NAATI credentialing support","A recruitment review","A representation framework with open reporting","A cultural expertise career framework"],
+ p:["HEAR","MAP","MAP","NURTURE","NURTURE"]},
+{c:"Y4",n:"Who you buy from and partner with",d:"Capacity",
+ g:["We keep a current directory of the multicultural organisations, media and suppliers available to us, and we use it.",
+    "Our contracts with suppliers include language and community requirements.",
+    "We have proper agreements with community organisations, and we pay them fairly.",
+    "We track how much of our spending goes to diverse suppliers, and it is growing.",
+    "We deliberately use our buying power to grow community businesses."],
+ s:["Build your organisation directory: which community organisations, media and suppliers are out there, and who to call.",
+    "Put language and community requirements into your contracts.",
+    "Make your community partnerships official, with fair payment.",
+    "Track your spend with diverse suppliers, and grow it.",
+    "Use your buying power to grow community businesses."],
+ t:["A community organisation and media directory, drawn from our national network","Contract clause templates","Partnership agreements with fair payment standards","Supplier diversity measurement","A community enterprise procurement strategy"],
+ p:["MAP","MAP","ACTIVATE","NURTURE","NURTURE"]},
+{c:"T1",n:"Leaders who show up",d:"Trust",
+ g:["Our leaders have been shown data or research on how well we currently serve multicultural communities.",
+    "A senior leader publicly owns this work, and it is on the leadership agenda.",
+    "Our leaders have spent real time in communities, listening.",
+    "Leaders here are judged partly on how communities are doing.",
+    "Our leaders speak up for communities beyond our own organisation."],
+ s:["Show your leaders the honest picture, including what the gap is costing you.",
+    "Get a senior leader to publicly own this work.",
+    "Get your leaders out into communities to listen, not present.",
+    "Measure your leaders on it.",
+    "Speak up beyond your own walls."],
+ t:["A leadership briefing on your baseline","Sponsorship and commitment support","Facilitated community listening visits with our advisors","Leadership scorecard design","Advocacy support"],
+ p:["HEAR","MAP","HEAR","NURTURE","NURTURE"]},
+{c:"T2",n:"Your own people feeling they belong",d:"Trust",
+ g:["We run regular staff surveys that measure belonging and inclusion, in language where needed.",
+    "We acted on what staff told us, and they can see it.",
+    "People here feel safe to speak up, including to disagree.",
+    "Staff from different backgrounds genuinely influence how we do things.",
+    "People can be fully themselves at work, and we keep checking that is true."],
+ s:["Measure it regularly: do your people feel they belong here?",
+    "Act on what they told you, visibly, and name what you did.",
+    "Make it safe to speak up: train your managers, reward honesty.",
+    "Give staff voices real influence on how things are done.",
+    "Keep measuring belonging, and keep improving it."],
+ t:["A staff inclusion survey, in language where needed","Response planning support","Psychological safety training for managers","Staff network and voice design","A belonging measurement program"],
+ p:["HEAR","ACTIVATE","ACTIVATE","MAP","NURTURE"]},
+{c:"T3",n:"Real community relationships",d:"Trust",
+ g:["We have spent time in communities just to listen, not to sell or promote anything.",
+    "When we ask communities for input, we always tell them what we heard and what we did about it.",
+    "We have made a promise to a community and kept it, visibly.",
+    "We have ongoing, paid relationships with community advisors who really influence us.",
+    "Communities would say they get as much from us as we get from them."],
+ s:["Go and listen, with nothing to sell.",
+    "Close the loop: tell communities what you heard and what will change.",
+    "Make one promise to a community and keep it.",
+    "Set up ongoing community advice, properly paid.",
+    "Check the relationship from their side, not just yours."],
+ t:["Facilitated listening sessions with our bilingual advisors","In-language report-backs through community media","Commitment delivery support","Community advisory group design, fair payment built in","A community-side relationship survey"],
+ p:["HEAR","ACTIVATE","ACTIVATE","MAP","NURTURE"]},
+{c:"T4",n:"Sharing the decisions",d:"Trust",
+ g:["We ask communities before making decisions that affect them, and we respond to what they say.",
+    "We have a paid community advisory group that meets regularly.",
+    "That group influences real decisions, including strategy.",
+    "We can point to a big decision we changed because of community input.",
+    "Community members hold real decision-making power in our organisation."],
+ s:["Ask before you decide, and answer what you hear.",
+    "Set up a paid community advisory group that meets regularly.",
+    "Give the group real influence, up to strategy level.",
+    "Let community input change something big, and say so.",
+    "Share real power: seats, votes or budgets."],
+ t:["Consultation design with a proper feedback loop","Advisory group establishment","Governance integration","Strategy-level co-design","Co-governance design"],
+ p:["HEAR","MAP","MAP","ACTIVATE","NURTURE"]}
+];
+
+var si=0;
+var answers=STREAMS.map(function(){return null;}); // 1..5 level, 0 none, "unsure"
+var participant={name:"",email:"",team:"",store:""};
+var startedAt=null,submitted=false;
+function el(id){return document.getElementById(id);}
+
+function start(){
+  var name=el("f_name").value.replace(/^\s+|\s+$/g,"");
+  if(!name){el("fielderr").style.display="block";el("f_name").focus();return;}
+  el("fielderr").style.display="none";
+  participant={name:name,email:el("f_email").value.replace(/^\s+|\s+$/g,""),team:el("f_team").value.replace(/^\s+|\s+$/g,""),store:el("f_store").value.replace(/^\s+|\s+$/g,"")};
+  startedAt=Date.now();
+  el("intro").classList.add("hide");el("assess").classList.remove("hide");render();window.scrollTo(0,0);
+}
+function restart(){si=0;answers=STREAMS.map(function(){return null;});submitted=false;el("results").classList.add("hide");el("intro").classList.remove("hide");window.scrollTo(0,0);}
+function streamScore(a){return (a==="unsure"||a===null)?0:a*20;}
+
+function render(){
+  var st=STREAMS[si];
+  el("pmeta").textContent=st.d+" · "+DOMQ[st.d];
+  el("pcount").textContent="Check "+(si+1)+" of 16";
+  el("pfill").style.width=((si/16)*100)+"%";
+  el("sdom").textContent=st.d;
+  el("sname").textContent=st.n;
+  var h="";
+  for(var i=0;i<5;i++){
+    h+='<button class="opt lad" data-l="'+(i+1)+'"><span class="lvl">'+((i+1)*20)+'</span><span>'+st.g[i]+'</span></button>';
+  }
+  el("ladder").innerHTML=h;
+  var btns=el("ladder").querySelectorAll(".lad");
+  for(var k=0;k<btns.length;k++){
+    (function(b){b.onclick=function(){answer(parseInt(b.getAttribute("data-l"),10))};})(btns[k]);
+  }
+  el("backbtn").style.visibility=si===0?"hidden":"visible";
+  el("lastdone").textContent="";
+}
+function answer(v){
+  answers[si]=v;
+  var done=STREAMS[si].n+": "+streamScore(v);
+  si++;
+  if(si>15){results();return;}
+  render();
+  el("lastdone").textContent=done;
+}
+function back(){
+  if(si===0)return;
+  si--;answers[si]=null;render();
+}
+function bandOf(s){for(var i=0;i<BANDS.length;i++){if(s>=BANDS[i][0])return BANDS[i][1]}return "Just starting"}
+function geomean(arr){var p=1;arr.forEach(function(v){p*=Math.max(v,10)});return Math.pow(p,1/arr.length)}
+
+function recordResponse(sScores,dScores,hxi,band,unsure){
+  var s=el("savestatus");
+  if(submitted)return;
+  if(!/^https?:/.test(SHEETS_ENDPOINT)){
+    s.textContent="Response not recorded: this page is not yet connected to Google Sheets (see SETUP.md).";
+    s.className="savestatus err";return;
+  }
+  var p={version:TOOL_VERSION,org:ORG,name:participant.name,email:participant.email,team:participant.team,store:participant.store,
+         hxi:hxi.toFixed(1),band:band,
+         d_knowledge:dScores[0].toFixed(1),d_capability:dScores[1].toFixed(1),d_capacity:dScores[2].toFixed(1),d_trust:dScores[3].toFixed(1),
+         unsure_count:unsure,duration_sec:startedAt?Math.round((Date.now()-startedAt)/1000):""};
+  STREAMS.forEach(function(st,i){p["a_"+st.c]=String(answers[i]);p["s_"+st.c]=String(sScores[i]);});
+  var body=Object.keys(p).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(p[k]==null?"":p[k])}).join("&");
+  s.textContent="Recording your response…";s.className="savestatus";
+  function send(attempt){
+    fetch(SHEETS_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body})
+      .then(function(r){
+        if(!r.ok)throw new Error("HTTP "+r.status);
+        submitted=true;s.textContent="Response recorded ✓";s.className="savestatus ok";
+      })
+      .catch(function(){
+        if(attempt<2){setTimeout(function(){send(attempt+1)},2000);}
+        else{s.textContent="We couldn’t record your response automatically. Your results are still shown — please screenshot this page and send it to your coordinator.";s.className="savestatus err";}
+      });
+  }
+  send(0);
+}
+
+function youSaid(i){
+  var a=answers[i],st=STREAMS[i];
+  if(a==="unsure")return 'You told us nobody was sure.';
+  if(a===0)return 'You told us none of the statements were true yet.';
+  return 'You told us: “'+st.g[a-1]+'”';
+}
+function results(){
+  el("assess").classList.add("hide");
+  var sScores=STREAMS.map(function(_,i){return streamScore(answers[i])});
+  function stopReason(a){return a==="unsure"?"unsure":a;}
+  var doms=["Knowledge","Capability","Capacity","Trust"];
+  var dScores=doms.map(function(d){
+    var vals=[];STREAMS.forEach(function(s,i){if(s.d===d)vals.push(sScores[i])});
+    var allZero=vals.every(function(v){return v===0});
+    return allZero?0:geomean(vals);});
+  var hxi=dScores.every(function(v){return v===0})?0:geomean(dScores),band=bandOf(hxi);
+  var amean=(dScores[0]+dScores[1]+dScores[2]+dScores[3])/4,gap=amean-hxi;
+  var weakest=doms[dScores.indexOf(Math.min.apply(null,dScores))];
+  var unsure=0;STREAMS.forEach(function(_,i){if(stopReason(answers[i])==="unsure")unsure++;});
+  recordResponse(sScores,dScores,hxi,band,unsure);
+  el("hxi").textContent=hxi.toFixed(1);
+  el("hband").textContent=band;
+  el("hsub").textContent=BANDBLURB[band];
+  el("domcards").innerHTML=doms.map(function(d,i){
+    return '<div class="dom-card"><div class="n">'+d+'</div><div class="v">'+dScores[i].toFixed(1)+'</div><div class="b">'+bandOf(dScores[i])+'</div><div class="track"><i style="width:'+dScores[i]+'%"></i></div></div>';}).join("");
+  el("diag").innerHTML='<span>Start with: <b>'+weakest+'</b>. Your weakest area holds the others back, so lifting it releases the most value.</span>';
+  if(unsure>0){
+    el("unsurebox").classList.remove("hide");
+    el("unsurebox").innerHTML='<b>You answered "I honestly don’t know" '+unsure+(unsure===1?' time':' times')+'.</b> That is a finding in itself: if nobody in the room knows, it is probably not happening in any organised way. For those areas, the first step is simply finding out, and we have marked them below.';
+  }
+  // top three moves: lowest streams, weakest domain first on ties
+  var order=STREAMS.map(function(s,i){return i}).sort(function(a,b){
+    var da=doms.indexOf(STREAMS[a].d),db=doms.indexOf(STREAMS[b].d);
+    return (sScores[a]-sScores[b])||(dScores[da]-dScores[db]);});
+  var top3=order.slice(0,3);
+  el("topmoves").innerHTML='<h3 class="movehead">Start here: your three biggest moves</h3>'+top3.map(function(i,rank){
+    var s=STREAMS[i],sc=sScores[i],b=Math.min(Math.floor(sc/20)*20,80)/20;
+    var un=stopReason(answers[i])==="unsure";
+    return '<div class="move"><div class="mrank">'+(rank+1)+'</div><div class="mbody">'+
+      '<div class="mname">'+s.n+' <span class="msc">'+sc+' out of 100</span></div>'+
+      '<div class="msaid">'+youSaid(i)+'</div>'+
+      (un?'<div class="unsurenote">If nobody knows, it is probably not happening. Step one is finding out:</div>':'')+
+      '<div class="next"><b>Your next step:</b> '+s.s[b]+'</div>'+
+      '<div class="lote"><span class="ph">'+s.p[b]+'</span>How we can help: '+s.t[b]+'</div>'+
+      '</div></div>';}).join("");
+  el("streamresults").innerHTML='<h3 class="movehead" style="margin-top:34px">The full picture</h3>'+doms.map(function(d){
+    var rows=STREAMS.map(function(s,i){
+      if(s.d!==d)return "";
+      var sc=sScores[i],b=Math.min(Math.floor(sc/20)*20,80)/20;
+      var un=stopReason(answers[i])==="unsure";
+      return '<div class="srow"><div class="top"><span class="nm">'+s.n+'</span><span class="sc">'+sc+' · '+bandOf(sc)+'</span></div>'+
+        '<div class="track"><i style="width:'+Math.max(sc,2)+'%"></i></div>'+
+        '<div class="msaid">'+youSaid(i)+'</div>'+
+        (un?'<div class="unsurenote">Nobody was sure here. Step one is finding out:</div>':'')+
+        '<div class="next"><b>Your next step:</b> '+s.s[b]+'</div>'+
+        '<div class="lote"><span class="ph">'+s.p[b]+'</span>How we can help: '+s.t[b]+'</div></div>';}).join("");
+    return '<div class="res-dom"><h3>'+d+' <span>'+DOMQ[d]+'</span></h3>'+rows+'</div>';}).join("");
+  el("results").classList.remove("hide");
+  window.scrollTo(0,0);
+}
+
+el("startbtn").onclick=start;
+el("backbtn").onclick=back;
+el("optnone").onclick=function(){answer(0)};
+el("optunsure").onclick=function(){answer("unsure")};
+el("restartbtn").onclick=restart;
+el("ctabtn").onclick=function(){window.location.href="https://loteagency.com.au/contact"};
+</script>
+</body>
+</html>
