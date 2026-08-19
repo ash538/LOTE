@@ -1,9 +1,8 @@
 const crypto = require('crypto');
-const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 
 const SESSION_DAYS = 14;
-const COOKIE = 'lote_admin';
+const COOKIE = 'ashchand_admin';
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   const derived = crypto.scryptSync(String(password), salt, 64).toString('hex');
@@ -30,7 +29,7 @@ function ensureAdmin() {
   const generated = !process.env.ADMIN_PASSWORD;
   const password = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
 
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO users (id, email, name, password_hash, role) VALUES (?, ?, ?, ?, 'admin')
   `).run(id, email.toLowerCase(), 'Site admin', hashPassword(password));
@@ -42,7 +41,7 @@ function ensureAdmin() {
 }
 
 function createUser({ email, name, password, role = 'editor' }) {
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO users (id, email, name, password_hash, role) VALUES (?, ?, ?, ?, ?)
   `).run(id, String(email).toLowerCase(), name || '', hashPassword(password), role);

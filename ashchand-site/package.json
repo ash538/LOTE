@@ -1,7 +1,7 @@
 {
   "name": "ashchand-site",
   "version": "1.0.0",
-  "description": "ashchand.com.au — personal site with a built-in CMS",
+  "description": "ashchand.com.au \u2014 personal site with a built-in CMS",
   "private": true,
   "scripts": {
     "start": "node server/index.js",
@@ -13,7 +13,9 @@
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
-    "multer": "^2.0.0",
-    "uuid": "^9.0.0"
+    "multer": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.17"
   }
 }

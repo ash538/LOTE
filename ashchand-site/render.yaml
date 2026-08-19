@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ashchand
+    runtime: node
+    region: singapore # closest Render region to Australia
+    plan: starter # a persistent disk requires a paid instance; free has neither
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    # The database and uploaded files must survive a redeploy.
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      # Set these in the Render dashboard before the first deploy. If you skip
+      # them, a random password is generated and printed to the deploy log.
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

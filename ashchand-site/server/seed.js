@@ -1,6 +1,6 @@
 // Seeds the site with the approved design's content. Idempotent: it only fills
 // tables that are empty, so it never overwrites edits made in the admin.
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const db = require('./db');
 const settingsStore = require('./settings');
 const auth = require('./auth');
@@ -11,7 +11,7 @@ const isEmpty = table => db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get().
 function seedHome() {
   if (!isEmpty('pages')) return;
 
-  const pageId = uuidv4();
+  const pageId = randomUUID();
   db.prepare(`
     INSERT INTO pages (id, slug, title, status, sort_order, seo_description, is_locked)
     VALUES (?, 'home', 'Home', 'published', 0, ?, 1)
@@ -202,7 +202,7 @@ function seedHome() {
 
   const stmt = db.prepare('INSERT INTO blocks (id, page_id, type, anchor, data, sort_order) VALUES (?, ?, ?, ?, ?, ?)');
   blocks.forEach((block, index) => {
-    stmt.run(uuidv4(), pageId, block.type, block.anchor || '',
+    stmt.run(randomUUID(), pageId, block.type, block.anchor || '',
       JSON.stringify(Object.assign(defaultsFor(block.type), block.data || {})), index);
   });
 }
@@ -217,7 +217,7 @@ function seedNav() {
     ['header', 'Writing', '/#writing', 0, 0],
     ['header', 'Work with me', '/#contact', 1, 0],
     ['footer', 'LinkedIn', 'https://www.linkedin.com/in/ash-chand-494bb593', 0, 1],
-  ].forEach((row, index) => stmt.run(uuidv4(), row[0], row[1], row[2], row[3], row[4], index));
+  ].forEach((row, index) => stmt.run(randomUUID(), row[0], row[1], row[2], row[3], row[4], index));
 }
 
 function seedFormFields() {
@@ -235,7 +235,7 @@ function seedFormFields() {
       placeholder: 'A little context helps me prepare something useful.', required: 1,
     },
   ].forEach((field, index) => {
-    stmt.run(uuidv4(), field.name, field.label, field.type, field.placeholder, field.help || '', field.required, index);
+    stmt.run(randomUUID(), field.name, field.label, field.type, field.placeholder, field.help || '', field.required, index);
   });
 }
 

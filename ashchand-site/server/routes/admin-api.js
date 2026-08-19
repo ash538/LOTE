@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 const db = require('../db');
 const auth = require('../auth');
@@ -86,7 +86,7 @@ router.post('/collections/:key', auth.requireAuth, (req, res) => {
 
   const values = buildValues(def, req.body || {});
   if (values.sort_order === undefined) values.sort_order = nextSortOrder(def.table);
-  values.id = uuidv4();
+  values.id = randomUUID();
 
   const cols = Object.keys(values);
   db.prepare(`INSERT INTO ${def.table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`)
@@ -139,7 +139,7 @@ router.get('/pages/:id', auth.requireAuth, (req, res) => {
 
 router.post('/pages', auth.requireAuth, (req, res) => {
   const body = req.body || {};
-  const id = uuidv4();
+  const id = randomUUID();
   db.prepare(`
     INSERT INTO pages (id, slug, title, status, sort_order, seo_title, seo_description, og_image)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -185,7 +185,7 @@ router.post('/pages/:pageId/blocks', auth.requireAuth, (req, res) => {
   if (!page) return res.status(404).json({ error: 'Page not found' });
   if (!BLOCKS.some(b => b.type === req.body.type)) return res.status(400).json({ error: 'Unknown section type' });
 
-  const id = uuidv4();
+  const id = randomUUID();
   const next = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM blocks WHERE page_id = ?').get(page.id).n;
   const data = Object.assign(defaultsFor(req.body.type), parseJson(req.body.data, {}));
   db.prepare('INSERT INTO blocks (id, page_id, type, data, sort_order) VALUES (?, ?, ?, ?, ?)')
@@ -217,7 +217,7 @@ router.delete('/blocks/:id', auth.requireAuth, (req, res) => {
 router.post('/blocks/:id/duplicate', auth.requireAuth, (req, res) => {
   const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(req.params.id);
   if (!block) return res.status(404).json({ error: 'Section not found' });
-  const id = uuidv4();
+  const id = randomUUID();
   // An anchor must stay unique, so the copy starts without one.
   db.prepare('INSERT INTO blocks (id, page_id, type, anchor, data, sort_order, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)')
     .run(id, block.page_id, block.type, '', block.data, block.sort_order + 1, block.is_visible);
@@ -326,7 +326,7 @@ router.get('/media', auth.requireAuth, (req, res) => {
 
 router.post('/media', auth.requireAuth, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const id = uuidv4();
+  const id = randomUUID();
   db.prepare('INSERT INTO media (id, filename, original_name, mime, size, alt) VALUES (?, ?, ?, ?, ?, ?)')
     .run(id, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, req.body.alt || '');
   const row = db.prepare('SELECT * FROM media WHERE id = ?').get(id);

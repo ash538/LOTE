@@ -1,5 +1,5 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const db = require('../db');
 const content = require('../content');
 const settingsStore = require('../settings');
@@ -65,7 +65,7 @@ router.post('/enquiries', (req, res) => {
   const emailField = defs.find(d => d.type === 'email');
   const nameField = defs.find(d => /name/i.test(d.name));
 
-  const id = uuidv4();
+  const id = randomUUID();
   db.prepare(`
     INSERT INTO enquiries (id, name, email, data, source_page) VALUES (?, ?, ?, ?, ?)
   `).run(
