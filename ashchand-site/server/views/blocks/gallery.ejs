@@ -1,0 +1,19 @@
+<section class="section shell bg-<%= data.background || 'paper' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <% if (data.eyebrow || data.heading) { %>
+    <div class="gallery-head">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <% if (data.heading) { %><h2 class="display size-medium"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+    </div>
+  <% } %>
+  <div class="gallery cols-<%= data.columns || 3 %>" data-gallery>
+    <% (data.items || []).filter(item => item.image).forEach(item => { %>
+      <figure class="gallery-item">
+        <button type="button" class="gallery-open" data-full="<%= item.image %>" data-caption="<%= item.caption || '' %>">
+          <img src="<%= item.image %>" alt="<%= item.caption || '' %>" loading="lazy" />
+          <span class="sr-only">View larger</span>
+        </button>
+        <% if (item.caption) { %><figcaption><%= item.caption %></figcaption><% } %>
+      </figure>
+    <% }) %>
+  </div>
+</section>

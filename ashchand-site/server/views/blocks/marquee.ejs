@@ -1,0 +1,11 @@
+<% const words = (data.items || []).filter(Boolean); if (words.length) { %>
+<section class="marquee bg-<%= data.background || 'ink' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %>>
+  <div class="marquee-track" style="--marquee-speed: <%- h.cssNumber(data.speed, 30, 5, 200) %>s">
+    <% for (let pass = 0; pass < 2; pass++) { %>
+      <span class="marquee-group" <% if (pass === 1) { %>aria-hidden="true"<% } %>>
+        <% words.forEach(word => { %><span class="marquee-word"><%= word %></span><span class="marquee-dot" aria-hidden="true">◆</span><% }) %>
+      </span>
+    <% } %>
+  </div>
+</section>
+<% } %>

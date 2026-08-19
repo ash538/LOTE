@@ -9,6 +9,7 @@ const auth = require('../auth');
 const content = require('../content');
 const settingsStore = require('../settings');
 const { BLOCKS, defaultsFor } = require('../blocks');
+const { FONT_PAIRINGS, PALETTES } = require('../presets');
 const { uniqueSlug, parseJson, boolInt, slugify } = require('../helpers');
 const { UPLOAD_DIR } = require('../paths');
 
@@ -235,6 +236,9 @@ router.post('/pages/:pageId/blocks/reorder', auth.requireAuth, (req, res) => {
 
 // --- Settings --------------------------------------------------------------
 router.get('/settings', auth.requireAuth, (req, res) => res.json(settingsStore.schema()));
+
+// Starting points for the design controls.
+router.get('/presets', auth.requireAuth, (req, res) => res.json({ fonts: FONT_PAIRINGS, palettes: PALETTES }));
 
 router.put('/settings', auth.requireAdmin, (req, res) => {
   const allowed = new Set(settingsStore.DEFAULTS.map(d => d.key));

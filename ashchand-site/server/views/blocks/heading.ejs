@@ -1,0 +1,9 @@
+<section class="section shell bg-<%= data.background || 'paper' %> heading-section align-<%= data.align || 'left' %>"
+         <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="heading-inner">
+    <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+    <h2 class="display size-<%= data.size || 'large' %>"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+    <% if (data.intro) { %><p class="copy heading-intro"><%= data.intro %></p><% } %>
+    <% if (data.rule) { %><hr class="heading-rule" /><% } %>
+  </div>
+</section>

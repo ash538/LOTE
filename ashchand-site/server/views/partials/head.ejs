@@ -13,7 +13,14 @@
 <% if (settings.font_import_url) { %>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="<%= settings.font_import_url %>" rel="stylesheet" />
+<%
+  /* Loaded without blocking first paint: a slow or unreachable font host would
+     otherwise hold the whole page blank. Text renders in the fallback face and
+     swaps when the webfont arrives. */
+%>
+<link rel="preload" as="style" href="<%= settings.font_import_url %>"
+      onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="<%= settings.font_import_url %>" /></noscript>
 <% } %>
 <link rel="stylesheet" href="/assets/site.css" />
 <style>
@@ -25,6 +32,11 @@
     --muted: <%- h.cssValue(settings.color_muted) %>;
     --serif: <%- h.cssValue(settings.font_serif) %>;
     --sans: <%- h.cssValue(settings.font_sans) %>;
+    --scale: <%- h.cssNumber(settings.heading_scale, 1, 0.5, 2) %>;
+    --space: <%- h.cssNumber(settings.section_space, 1, 0.4, 2) %>;
+    --radius: <%- h.cssNumber(settings.corner_radius, 0, 0, 64) %>px;
+    --btn-radius: <%= settings.button_style === 'pill' ? '999px' : settings.button_style === 'rounded' ? '8px' : '0px' %>;
+    --container: <%- h.cssNumber(settings.container_width, 1440, 900, 2200) %>px;
   }
 </style>
 <% if (settings.custom_css) { %><style><%- settings.custom_css %></style><% } %>

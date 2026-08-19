@@ -32,10 +32,14 @@ Sign in at `/admin` with that, then change it under **Account**. To choose your
 own instead, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` before the first boot. There
 is no default password — an unset one is always randomly generated.
 
+**New here? Read `BUILDER.md`** — a step-by-step walkthrough of using this as
+your own website builder.
+
 ## The page
 
 One page, built from sections you can edit, reorder by dragging, hide or
-duplicate:
+duplicate. Twenty-one section types are available; these nine make up the
+approved design:
 
 | Section | What it is |
 |---|---|
@@ -49,7 +53,11 @@ duplicate:
 | Writing feature | The essay, its PDF and the Substack note |
 | Contact | The enquiry form |
 
-Plus a plain **Text section** and a **Custom HTML** section for anything new.
+Plus structural sections (**Heading**, **Divider**, **Text**, **Custom HTML**),
+a **Card grid**, and six interactive ones: **Accordion**, **Tabs**, **Numbers**
+that count up, a **Quote carousel**, an **Image gallery** with a lightbox, and a
+**Scrolling strip**. All of them are keyboard accessible and respect a
+visitor's reduce-motion setting.
 
 Each section has a **section link name** (its anchor). `story` makes `/#story`
 scroll to it, which is how the menu works. Change an anchor and update the
@@ -72,13 +80,15 @@ matching menu link under **Menus**.
   validation follow automatically.
 - **Enquiries** — every submission, with status, private notes and CSV export.
 - **Files** — images and PDFs, reusable anywhere on the site.
-- **Settings & theme** — your name and logo letter, the five brand colours, the
-  two fonts, the scroll progress bar, footer lines, form wording, SEO and
-  Google Analytics.
+- **Settings & theme** — a design playground: eight font pairings, eight colour
+  palettes, and sliders for heading size, section spacing, corner rounding and
+  page width, all against a live preview of your real site. Plus your name and
+  logo letter, footer lines, form wording, SEO and Google Analytics.
 - **Account** — your password, and extra sign-ins if you ever want one.
 
-Colours and fonts are injected as CSS variables at render time, so a theme
-change shows on the next page load.
+Colours, fonts and spacing are injected as CSS variables at render time, so a
+theme change shows on the next page load. Numeric values are clamped and colour
+values sanitised, so no setting can break the layout.
 
 ### Drafts and preview
 

@@ -50,6 +50,16 @@
     return node;
   }
 
+  // Mirrors h.cssValue on the server, so the preview can never render a rule
+  // the saved site would not — and a stray brace cannot break the preview.
+  function cssValue(value) {
+    var out = String(value == null ? '' : value).replace(/[<>;{}@\\]/g, '').replace(/[/*]/g, '').trim();
+    ['"', "'"].forEach(function (quote) {
+      if ((out.split(quote).length - 1) % 2 !== 0) out = out.split(quote).join('');
+    });
+    return out;
+  }
+
   function confirmed(message) { return window.confirm(message); }
 
   // --- Collections ---------------------------------------------------------
@@ -133,6 +143,19 @@
         onChange(text.value);
       });
       return fieldWrap(def, el('div', { class: 'color-field' }, [picker, text]));
+    }
+
+    if (type === 'range') {
+      var slider = el('input', {
+        type: 'range', min: def.min || '0', max: def.max || '100', step: def.step || '1',
+      });
+      slider.value = value == null || value === '' ? (def.min || '0') : value;
+      var readout = el('output', { class: 'range-value', text: String(slider.value) });
+      slider.addEventListener('input', function () {
+        readout.textContent = slider.value;
+        onChange(slider.value);
+      });
+      return fieldWrap(def, el('div', { class: 'range-field' }, [slider, readout]));
     }
 
     if (type === 'image' || type === 'file') {
@@ -774,14 +797,132 @@
     }).catch(handleAuthError);
   }
 
-  function viewSettings() {
-    api('/settings').then(function (schema) {
+  function viewSettings(keepGroup) {
+    Promise.all([api('/settings'), api('/presets')]).then(function (results) {
+      var schema = results[0];
+      var presets = results[1];
       var draft = {};
       schema.fields.forEach(function (field) { draft[field.key] = field.value; });
 
-      var activeGroup = schema.groups[0].key;
+      // Re-rendering (after a discard) should leave you on the tab you were on.
+      var activeGroup = keepGroup || schema.groups[0].key;
       var tabs = el('div', { class: 'tabs' });
       var panel = el('div', {});
+      var preview = el('iframe', { class: 'theme-preview-frame', src: '/', title: 'Live preview' });
+      var previewWidth = 'desktop';
+
+      // The preview is same-origin, so the draft theme can be pushed straight
+      // into its document — no save, no reload.
+      function applyPreview() {
+        var doc = preview.contentDocument;
+        if (!doc || !doc.head || !doc.body) return;
+        var style = doc.getElementById('theme-draft') || doc.createElement('style');
+        style.id = 'theme-draft';
+        style.textContent = ':root{' +
+          '--paper:' + cssValue(draft.color_paper) + ';' +
+          '--ink:' + cssValue(draft.color_ink) + ';' +
+          '--oxblood:' + cssValue(draft.color_oxblood) + ';' +
+          '--butter:' + cssValue(draft.color_butter) + ';' +
+          '--muted:' + cssValue(draft.color_muted) + ';' +
+          '--serif:' + cssValue(draft.font_serif) + ';' +
+          '--sans:' + cssValue(draft.font_sans) + ';' +
+          '--scale:' + (draft.heading_scale || 1) + ';' +
+          '--space:' + (draft.section_space || 1) + ';' +
+          '--radius:' + (draft.corner_radius || 0) + 'px;' +
+          '--btn-radius:' + (draft.button_style === 'pill' ? '999px' : draft.button_style === 'rounded' ? '8px' : '0px') + ';' +
+          '--container:' + (draft.container_width || 1440) + 'px;' +
+          '}' +
+          // Scroll reveals never fire inside an off-screen iframe, which would
+          // leave the preview blank. Show everything instead.
+          '[data-reveal]{opacity:1 !important;transform:none !important}';
+        if (!style.parentNode) doc.head.appendChild(style);
+
+        // Pull in the preset's web fonts so the preview shows the real faces.
+        if (draft.font_import_url) {
+          var link = doc.getElementById('theme-draft-font') || doc.createElement('link');
+          link.id = 'theme-draft-font';
+          link.rel = 'stylesheet';
+          if (link.href !== draft.font_import_url) link.href = draft.font_import_url;
+          if (!link.parentNode) doc.head.appendChild(link);
+        }
+      }
+
+      // A slow or blocked webfont can delay `load` indefinitely, which would
+      // leave the preview blank, so poll for the document rather than wait.
+      function applyPreviewWhenReady(attempt) {
+        var doc = preview.contentDocument;
+        if (doc && doc.head && doc.body) { applyPreview(); return; }
+        if (attempt < 60) setTimeout(function () { applyPreviewWhenReady(attempt + 1); }, 120);
+      }
+
+      preview.addEventListener('load', applyPreview);
+      applyPreviewWhenReady(0);
+
+      function onFieldChange(key, value) {
+        draft[key] = value;
+        if (schemaGroupOf(key) === 'theme') applyPreview();
+      }
+
+      function schemaGroupOf(key) {
+        var field = schema.fields.find(function (f) { return f.key === key; });
+        return field ? field.group : '';
+      }
+
+      function applyPreset(values) {
+        Object.keys(values).forEach(function (key) { draft[key] = values[key]; });
+        paint();
+        applyPreview();
+        toast('Applied — save to keep it');
+      }
+
+      function presetButtons() {
+        var fontRow = el('div', { class: 'preset-grid' });
+        presets.fonts.forEach(function (pair) {
+          var active = draft.font_serif === pair.heading && draft.font_sans === pair.body;
+          fontRow.appendChild(el('button', {
+            class: 'preset' + (active ? ' is-active' : ''), type: 'button',
+            onclick: function () {
+              applyPreset({ font_serif: pair.heading, font_sans: pair.body, font_import_url: pair.import });
+            },
+          }, [
+            el('strong', { text: pair.label, style: 'font-family:' + pair.heading }),
+            el('span', { text: pair.note }),
+          ]));
+        });
+
+        var paletteRow = el('div', { class: 'preset-grid' });
+        presets.palettes.forEach(function (palette) {
+          var active = draft.color_oxblood === palette.accent && draft.color_paper === palette.paper;
+          var swatches = el('span', { class: 'swatches' });
+          [palette.paper, palette.ink, palette.accent, palette.highlight].forEach(function (colour) {
+            var chip = el('i', {});
+            chip.style.background = colour;
+            swatches.appendChild(chip);
+          });
+          paletteRow.appendChild(el('button', {
+            class: 'preset' + (active ? ' is-active' : ''), type: 'button',
+            onclick: function () {
+              applyPreset({
+                color_paper: palette.paper, color_ink: palette.ink, color_oxblood: palette.accent,
+                color_butter: palette.highlight, color_muted: palette.muted,
+              });
+            },
+          }, [swatches, el('strong', { text: palette.label }), el('span', { text: palette.note })]));
+        });
+
+        return el('div', {}, [
+          el('div', { class: 'card' }, [
+            el('h3', { text: 'Font pairings' }),
+            el('p', { class: 'hint', text: 'Click one to try it. Nothing is saved until you press Save.' }),
+            fontRow,
+          ]),
+          el('div', { class: 'card' }, [
+            el('h3', { text: 'Colour palettes' }),
+            el('p', { class: 'hint', text: 'Each sets all five colours. Fine-tune any of them below.' }),
+            paletteRow,
+          ]),
+        ]);
+      }
 
       function paint() {
         tabs.textContent = '';
@@ -791,29 +932,65 @@
             onclick: function () { activeGroup = group.key; paint(); },
           }));
         });
+
         panel.textContent = '';
+        if (activeGroup === 'theme') panel.appendChild(presetButtons());
+
         var card = el('div', { class: 'card' });
         schema.fields.filter(function (f) { return f.group === activeGroup; }).forEach(function (field) {
           card.appendChild(renderField(
-            { name: field.key, label: field.label, type: field.type, options: field.options },
-            draft[field.key], function (value) { draft[field.key] = value; }
+            { name: field.key, label: field.label, type: field.type, options: field.options,
+              min: field.min, max: field.max, step: field.step },
+            draft[field.key], function (value) { onFieldChange(field.key, value); }
           ));
         });
         panel.appendChild(card);
       }
       paint();
 
-      renderShell(el('div', {}, [
-        headRow('Settings & theme', 'Your name, colours, type, footer, form and SEO. Changes apply to the live site.', [
+      var previewPane = el('div', { class: 'theme-preview' }, [
+        el('div', { class: 'theme-preview-bar' }, [
+          el('span', { text: 'Live preview' }),
+          el('div', { class: 'list-actions' }, [
+            el('button', { class: 'btn btn-sm', type: 'button', text: 'Desktop', onclick: function (e) {
+              previewWidth = 'desktop';
+              preview.parentNode.classList.remove('is-mobile');
+              setActive(e.target);
+            } }),
+            el('button', { class: 'btn btn-sm', type: 'button', text: 'Mobile', onclick: function (e) {
+              previewWidth = 'mobile';
+              preview.parentNode.classList.add('is-mobile');
+              setActive(e.target);
+            } }),
+            el('button', { class: 'btn btn-sm', type: 'button', text: 'Reload', onclick: function () {
+              preview.contentWindow.location.reload();
+            } }),
+          ]),
+        ]),
+        preview,
+      ]);
+
+      function setActive(button) {
+        var row = button.parentNode;
+        Array.prototype.forEach.call(row.children, function (b) { b.classList.remove('btn-primary'); });
+        button.classList.add('btn-primary');
+      }
+
+      renderShell(el('div', { class: 'settings-layout' }, [
+        headRow('Settings & theme', 'Try a font pairing or palette, nudge the sliders, and watch the preview. Nothing goes live until you save.', [
           el('a', { class: 'btn', href: '/', target: '_blank', text: 'View site ↗' }),
         ]),
-        tabs,
-        panel,
+        el('div', { class: 'settings-split' }, [
+          el('div', {}, [tabs, panel]),
+          previewPane,
+        ]),
         el('div', { class: 'sticky-save' }, [
           el('button', { class: 'btn btn-primary', text: 'Save settings', onclick: function () {
-            api('/settings', { method: 'PUT', body: draft }).then(function () { toast('Settings saved'); }).catch(fail);
+            api('/settings', { method: 'PUT', body: draft })
+              .then(function () { toast('Saved — your site is updated'); }).catch(fail);
           } }),
-          el('span', { class: 'status', text: 'Theme changes show on the next page load.' }),
+          el('button', { class: 'btn', text: 'Discard changes', onclick: function () { viewSettings(activeGroup); } }),
+          el('span', { class: 'status', text: 'The preview is your draft; the live site changes on save.' }),
         ]),
       ]));
     }).catch(handleAuthError);

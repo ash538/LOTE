@@ -1,0 +1,11 @@
+<section class="section shell cta bg-<%= data.background || 'ink' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="cta-inner">
+    <div>
+      <% if (data.heading) { %><h2 class="display size-medium"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+      <% if (data.text) { %><p class="cta-text"><%= data.text %></p><% } %>
+    </div>
+    <% if (data.button_label) { %>
+      <a class="button cta-button" href="<%= data.button_url || '#contact' %>"><%= data.button_label %></a>
+    <% } %>
+  </div>
+</section>

@@ -1,0 +1,24 @@
+<section class="section shell bg-<%= data.background || 'paper' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <% if (data.eyebrow || data.heading) { %>
+    <div class="tabs-head">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <% if (data.heading) { %><h2 class="display size-medium"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+    </div>
+  <% } %>
+  <div class="tabs" data-tabs>
+    <div class="tab-list" role="tablist">
+      <% (data.items || []).forEach((item, i) => { %>
+        <button type="button" role="tab" class="tab-button" id="tab-<%= block.id %>-<%= i %>"
+                aria-controls="panel-<%= block.id %>-<%= i %>" aria-selected="<%= i === 0 ? 'true' : 'false' %>"
+                tabindex="<%= i === 0 ? '0' : '-1' %>"><%= item.label %></button>
+      <% }) %>
+    </div>
+    <% (data.items || []).forEach((item, i) => { %>
+      <div class="tab-panel" role="tabpanel" id="panel-<%= block.id %>-<%= i %>"
+           aria-labelledby="tab-<%= block.id %>-<%= i %>" <%= i === 0 ? '' : 'hidden' %>>
+        <% if (item.heading) { %><h3><%= item.heading %></h3><% } %>
+        <div class="prose"><%- h.richText(item.body) %></div>
+      </div>
+    <% }) %>
+  </div>
+</section>

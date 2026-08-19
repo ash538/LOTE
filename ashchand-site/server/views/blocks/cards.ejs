@@ -1,0 +1,19 @@
+<section class="section shell bg-<%= data.background || 'paper' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <% if (data.eyebrow || data.heading || data.intro) { %>
+    <div class="cards-head">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <% if (data.heading) { %><h2 class="display size-medium"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+      <% if (data.intro) { %><p class="copy"><%= data.intro %></p><% } %>
+    </div>
+  <% } %>
+  <div class="card-grid cols-<%= data.columns || 3 %>">
+    <% (data.items || []).forEach(item => { const tag = item.url ? 'a' : 'div'; %>
+      <<%= tag %> class="card" <% if (item.url) { %>href="<%= item.url %>"<% } %>>
+        <% if (item.icon) { %><span class="card-icon"><%= item.icon %></span><% } %>
+        <h3><%= item.title %></h3>
+        <% if (item.text) { %><p><%= item.text %></p><% } %>
+        <% if (item.url) { %><span class="card-arrow" aria-hidden="true">↗</span><% } %>
+      </<%= tag %>>
+    <% }) %>
+  </div>
+</section>

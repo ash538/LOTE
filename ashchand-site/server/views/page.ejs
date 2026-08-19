@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-AU">
 <head><%- include('partials/head') %></head>
-<body>
+<body<% if (settings.animate_on_scroll !== '1') { %> data-no-animation<% } %>>
   <%- include('partials/header') %>
   <main id="top">
     <% page.blocks.forEach(block => {

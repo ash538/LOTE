@@ -19,7 +19,13 @@ const DEFAULTS = [
   { key: 'font_serif', label: 'Display font stack', group: 'theme', type: 'text', value: '"DM Serif Display", Georgia, serif' },
   { key: 'font_sans', label: 'Body font stack', group: 'theme', type: 'text', value: 'Manrope, Arial, sans-serif' },
   { key: 'font_import_url', label: 'Google Fonts URL', group: 'theme', type: 'text', value: 'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap' },
+  { key: 'heading_scale', label: 'Heading size', group: 'theme', type: 'range', min: '0.7', max: '1.4', step: '0.05', value: '1' },
+  { key: 'section_space', label: 'Section spacing', group: 'theme', type: 'range', min: '0.6', max: '1.5', step: '0.05', value: '1' },
+  { key: 'corner_radius', label: 'Corner rounding (px)', group: 'theme', type: 'range', min: '0', max: '32', step: '1', value: '0' },
+  { key: 'button_style', label: 'Button shape', group: 'theme', type: 'select', options: ['square', 'rounded', 'pill'], value: 'square' },
+  { key: 'container_width', label: 'Max content width (px)', group: 'theme', type: 'range', min: '1040', max: '1680', step: '20', value: '1440' },
   { key: 'show_progress_bar', label: 'Show scroll progress bar', group: 'theme', type: 'checkbox', value: '1' },
+  { key: 'animate_on_scroll', label: 'Fade sections in as you scroll', group: 'theme', type: 'checkbox', value: '1' },
   { key: 'custom_css', label: 'Custom CSS', group: 'theme', type: 'textarea', value: '' },
 
   // --- Footer & links ---

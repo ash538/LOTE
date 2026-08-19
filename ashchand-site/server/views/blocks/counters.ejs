@@ -1,0 +1,18 @@
+<section class="section shell bg-<%= data.background || 'ink' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <% if (data.eyebrow || data.heading) { %>
+    <div class="counters-head">
+      <% if (data.eyebrow) { %><span class="eyebrow"><%= data.eyebrow %></span><% } %>
+      <% if (data.heading) { %><h2 class="display size-medium"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+    </div>
+  <% } %>
+  <div class="counters">
+    <% (data.items || []).forEach(item => { %>
+      <div class="counter">
+        <span class="counter-value" data-count-to="<%= item.value %>">
+          <%= item.prefix || '' %><span data-count-target><%= item.value %></span><%= item.suffix || '' %>
+        </span>
+        <span class="counter-label"><%= item.label %></span>
+      </div>
+    <% }) %>
+  </div>
+</section>

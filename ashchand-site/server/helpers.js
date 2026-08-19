@@ -131,6 +131,17 @@ function cssValue(value) {
   return out;
 }
 
+// Numeric CSS tokens come from range sliders; clamp them so a hand-edited
+// value can never produce broken layout.
+function cssNumber(value, fallback, min, max) {
+  // An empty field means "unset", not zero — Number('') is 0, which would
+  // otherwise clamp to the minimum and silently shrink the design.
+  if (value === '' || value == null) return fallback;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(Math.max(n, min), max);
+}
+
 function excerptFrom(text, length = 165) {
   const plain = String(text || '').replace(/[#>*`_[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
   if (plain.length <= length) return plain;
@@ -159,5 +170,5 @@ function boolInt(value) {
 
 module.exports = {
   slugify, uniqueSlug, escapeHtml, parseJson, richText,
-  excerptFrom, formatDate, readTime, boolInt, cssValue,
+  excerptFrom, formatDate, readTime, boolInt, cssValue, cssNumber,
 };

@@ -1,0 +1,26 @@
+<section class="section shell bg-<%= data.background || 'paper' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="section-grid">
+    <div class="section-title">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <% if (data.heading) { %><h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+      <% if (data.intro) { %><p class="copy"><%= data.intro %></p><% } %>
+    </div>
+    <div class="accordion" data-accordion>
+      <% (data.items || []).forEach((item, i) => { %>
+        <div class="accordion-item">
+          <h3>
+            <button type="button" class="accordion-trigger" aria-expanded="<%= data.open_first && i === 0 ? 'true' : 'false' %>"
+                    aria-controls="acc-<%= block.id %>-<%= i %>" id="acctab-<%= block.id %>-<%= i %>">
+              <span><%= item.question %></span>
+              <span class="accordion-icon" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="accordion-panel" id="acc-<%= block.id %>-<%= i %>" role="region"
+               aria-labelledby="acctab-<%= block.id %>-<%= i %>" <%= data.open_first && i === 0 ? '' : 'hidden' %>>
+            <div class="prose"><%- h.richText(item.answer) %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

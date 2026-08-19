@@ -201,3 +201,44 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .thumb { display: grid; place-items: center; }
 .thumb-label { font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--dim); }
 .image-field .preview { font-weight: 700; }
+
+/* --- Design playground ----------------------------------------------------- */
+.settings-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+
+.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.preset {
+  display: grid; gap: 5px; padding: 13px 14px; text-align: left; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff; font: inherit;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.preset:hover { border-color: var(--accent); transform: translateY(-2px); }
+.preset.is-active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.preset strong { font-size: 16px; font-weight: 600; }
+.preset span { font-size: 12px; color: var(--dim); line-height: 1.45; }
+.swatches { display: flex; gap: 4px; margin-bottom: 4px; }
+.swatches i { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,.12); border-radius: 4px; }
+
+.range-field { display: flex; gap: 12px; align-items: center; }
+.range-field input[type="range"] { flex: 1; accent-color: var(--accent); }
+.range-value {
+  min-width: 54px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; font-size: 13px; font-variant-numeric: tabular-nums; text-align: center;
+}
+
+.theme-preview {
+  position: sticky; top: 22px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--panel); overflow: hidden;
+}
+.theme-preview-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border-bottom: 1px solid var(--line);
+  font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+}
+.theme-preview-frame { display: block; width: 100%; height: 74vh; border: 0; background: #fff; }
+.theme-preview.is-mobile .theme-preview-frame { width: 390px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+
+@media (max-width: 1200px) {
+  .settings-split { grid-template-columns: 1fr; }
+  .theme-preview { position: static; }
+  .theme-preview-frame { height: 60vh; }
+}
