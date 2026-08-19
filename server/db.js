@@ -1,8 +1,7 @@
 const Database = require('better-sqlite3');
-const path = require('path');
+const { DB_PATH } = require('./paths');
 
-const dbPath = path.join(__dirname, '..', 'quotes.db');
-const db = new Database(dbPath);
+const db = new Database(DB_PATH);
 
 // Enable WAL mode for better concurrency
 db.pragma('journal_mode = WAL');

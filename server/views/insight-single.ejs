@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head') %></head>
+<body>
+  <%- include('partials/header') %>
+  <main id="main">
+    <article>
+      <section class="section page-head">
+        <div class="container narrow">
+          <p class="eyebrow reveal"><a href="/insights">Insights</a><%= item.category ? ' · ' + item.category : '' %></p>
+          <h1 class="display-sm reveal"><%= item.title %></h1>
+          <p class="article-meta reveal"><%= [item.author, item.date_label, item.read_time].filter(Boolean).join(' · ') %></p>
+        </div>
+      </section>
+      <% if (item.hero_image) { %>
+        <div class="container narrow"><figure class="hero-figure reveal"><img src="<%= item.hero_image %>" alt="" loading="lazy"></figure></div>
+      <% } %>
+      <section class="section section-tight">
+        <div class="container narrow prose reveal"><%- item.body_html %></div>
+      </section>
+      <% if ((item.related || []).length) { %>
+        <section class="section bg-muted">
+          <div class="container">
+            <h2 class="section-title reveal">Keep reading</h2>
+            <div class="grid cols-2">
+              <% item.related.forEach(rel => { %>
+                <a class="card insight-card reveal" href="/insights/<%= rel.slug %>">
+                  <p class="work-meta"><%= [rel.category, rel.date_label].filter(Boolean).join(' · ') %></p>
+                  <h3><%= rel.title %></h3>
+                  <p><%= rel.excerpt %></p>
+                </a>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+      <% } %>
+    </article>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

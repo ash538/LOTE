@@ -1,0 +1,7 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container <%= data.align === 'centred' ? 'narrow centred' : 'narrow' %>">
+    <% if (data.eyebrow) { %><p class="eyebrow reveal"><%= data.eyebrow %></p><% } %>
+    <% if (data.heading) { %><h2 class="section-title reveal"><%= data.heading %></h2><% } %>
+    <div class="prose reveal <%= data.align === 'two-column' ? 'prose-columns' : '' %>"><%- h.richText(data.body) %></div>
+  </div>
+</section>

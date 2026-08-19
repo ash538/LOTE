@@ -1,0 +1,34 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container">
+    <div class="section-head reveal">
+      <% if (data.eyebrow) { %><p class="eyebrow"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h2 class="section-title"><%= data.heading %></h2><% } %>
+      <% if (data.intro) { %><p class="lede"><%= data.intro %></p><% } %>
+    </div>
+    <% if (data.layout === 'cards') { %>
+      <div class="grid cols-3">
+        <% (source.items || []).forEach(item => { %>
+          <a class="card service-card reveal" href="/services/<%= item.slug %>">
+            <% if (item.icon) { %><span class="feature-icon"><%= item.icon %></span><% } %>
+            <h3><%= item.title %></h3>
+            <p><%= item.summary %></p>
+            <span class="card-arrow">→</span>
+          </a>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <ul class="service-rows">
+        <% (source.items || []).forEach((item, i) => { %>
+          <li class="reveal">
+            <a href="/services/<%= item.slug %>">
+              <span class="service-index"><%= String(i + 1).padStart(2, '0') %></span>
+              <span class="service-title"><%= item.title %></span>
+              <span class="service-summary"><%= item.summary %></span>
+              <span class="card-arrow">→</span>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

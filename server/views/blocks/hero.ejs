@@ -1,0 +1,25 @@
+<% const heroHasMedia = !!data.image && data.variant !== 'centred' && data.variant !== 'full-bleed'; %>
+<section class="section hero hero-<%= data.variant || 'split' %> <%= heroHasMedia ? 'has-media' : '' %> bg-<%= data.background || 'paper' %>">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <% if (data.eyebrow) { %><p class="eyebrow reveal"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h1 class="display reveal"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br>') %></h1><% } %>
+      <% if (data.intro) { %><p class="lede reveal"><%= data.intro %></p><% } %>
+      <% if ((data.links || []).length) { %>
+        <div class="btn-row reveal">
+          <% data.links.forEach(link => { if (!link.label) return; %>
+            <a class="btn btn-<%= link.style || 'primary' %> btn-lg" href="<%= link.url || '#' %>"><%= link.label %></a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+    <% if (heroHasMedia) { %>
+      <div class="hero-media reveal">
+        <img src="<%= data.image %>" alt="" loading="eager">
+      </div>
+    <% } %>
+  </div>
+  <% if (data.image && data.variant === 'full-bleed') { %>
+    <div class="hero-fullbleed"><img src="<%= data.image %>" alt="" loading="lazy"></div>
+  <% } %>
+</section>

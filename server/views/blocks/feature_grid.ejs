@@ -1,0 +1,20 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container">
+    <div class="section-head reveal">
+      <% if (data.eyebrow) { %><p class="eyebrow"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h2 class="section-title"><%= data.heading %></h2><% } %>
+      <% if (data.intro) { %><p class="lede"><%= data.intro %></p><% } %>
+    </div>
+    <div class="grid cols-<%= data.columns || 3 %>">
+      <% (data.items || []).forEach(item => { %>
+        <% const tag = item.url ? 'a' : 'div'; %>
+        <<%= tag %> class="card feature-card reveal" <% if (item.url) { %>href="<%= item.url %>"<% } %>>
+          <% if (item.icon) { %><span class="feature-icon"><%= item.icon %></span><% } %>
+          <h3><%= item.title %></h3>
+          <p><%= item.text %></p>
+          <% if (item.url) { %><span class="card-arrow">→</span><% } %>
+        </<%= tag %>>
+      <% }) %>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container">
+    <div class="section-head reveal">
+      <% if (data.eyebrow) { %><p class="eyebrow"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h2 class="section-title"><%= data.heading %></h2><% } %>
+    </div>
+    <div class="grid cols-3">
+      <% (source.items || []).forEach(item => { %>
+        <a class="card insight-card reveal" href="/insights/<%= item.slug %>">
+          <% if (item.hero_image) { %><div class="insight-card-media"><img src="<%= item.hero_image %>" alt="" loading="lazy"></div><% } %>
+          <p class="work-meta"><%= [item.category, item.date_label].filter(Boolean).join(' · ') %></p>
+          <h3><%= item.title %></h3>
+          <p><%= item.excerpt %></p>
+          <span class="card-arrow">→</span>
+        </a>
+      <% }) %>
+    </div>
+    <% if (data.link_label) { %>
+      <div class="section-foot reveal"><a class="btn btn-secondary" href="<%= data.link_url || '/insights' %>"><%= data.link_label %></a></div>
+    <% } %>
+  </div>
+</section>

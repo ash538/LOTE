@@ -1,0 +1,55 @@
+<footer class="site-footer">
+  <div class="container">
+    <% if (settings.footer_heading) { %>
+      <div class="footer-cta reveal">
+        <h2><%= settings.footer_heading %></h2>
+        <% if (settings.footer_cta_label) { %>
+          <a class="btn btn-accent btn-lg" href="<%= settings.footer_cta_url || '/contact' %>"><%= settings.footer_cta_label %></a>
+        <% } %>
+      </div>
+    <% } %>
+
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <span class="brand-mark"><%= settings.logo_text || settings.site_name %></span>
+        <p><%= settings.site_tagline %></p>
+      </div>
+
+      <div class="footer-col">
+        <h3>Explore</h3>
+        <ul>
+          <% (footerNav.length ? footerNav : nav).forEach(item => { %>
+            <li><a href="<%= item.url %>"><%= item.label %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <ul>
+          <% if (settings.contact_email) { %><li><a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a></li><% } %>
+          <% if (settings.contact_phone) { %><li><a href="tel:<%= settings.contact_phone.replace(/\s/g, '') %>"><%= settings.contact_phone %></a></li><% } %>
+          <% if (settings.contact_address) { %><li class="footer-address"><%- h.escapeHtml(settings.contact_address).replace(/\n/g, '<br>') %></li><% } %>
+          <% if (settings.contact_abn) { %><li>ABN <%= settings.contact_abn %></li><% } %>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Follow</h3>
+        <ul>
+          <% [['LinkedIn', settings.social_linkedin], ['Instagram', settings.social_instagram], ['Facebook', settings.social_facebook], ['X', settings.social_x]].filter(s => s[1]).forEach(([label, url]) => { %>
+            <li><a href="<%= url %>" target="_blank" rel="noopener"><%= label %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+
+    <% if (settings.footer_note) { %><p class="footer-note"><%= settings.footer_note %></p><% } %>
+
+    <div class="footer-legal">
+      <span><%= settings.footer_legal %></span>
+      <span><a href="/admin">Team login</a></span>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>

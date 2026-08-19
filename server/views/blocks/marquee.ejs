@@ -1,0 +1,11 @@
+<% const items = (data.items || []).filter(Boolean); if (items.length) { %>
+<section class="marquee bg-<%= data.background || 'primary' %>" aria-hidden="true">
+  <div class="marquee-track" style="--marquee-speed: <%= data.speed || 28 %>s">
+    <% for (let pass = 0; pass < 2; pass++) { %>
+      <span class="marquee-group">
+        <% items.forEach(item => { %><span class="marquee-item"><%= item %></span><span class="marquee-dot">◍</span><% }) %>
+      </span>
+    <% } %>
+  </div>
+</section>
+<% } %>

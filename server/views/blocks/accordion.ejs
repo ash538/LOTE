@@ -1,0 +1,13 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container narrow">
+    <% if (data.heading) { %><h2 class="section-title reveal"><%= data.heading %></h2><% } %>
+    <div class="accordion">
+      <% (data.items || []).forEach(item => { %>
+        <details class="accordion-item reveal">
+          <summary><%= item.question %><span class="accordion-icon" aria-hidden="true">+</span></summary>
+          <div class="prose"><%- h.richText(item.answer) %></div>
+        </details>
+      <% }) %>
+    </div>
+  </div>
+</section>

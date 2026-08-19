@@ -1,0 +1,13 @@
+<section class="section section-tight bg-<%= data.background || 'muted' %>">
+  <div class="container">
+    <% if (data.heading) { %><h2 class="section-title centred reveal"><%= data.heading %></h2><% } %>
+    <div class="stats-row">
+      <% (data.items || []).forEach(item => { %>
+        <div class="stat reveal">
+          <span class="stat-value"><%= item.value %></span>
+          <span class="stat-label"><%= item.label %></span>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

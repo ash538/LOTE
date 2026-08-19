@@ -1,0 +1,45 @@
+<section class="section bg-<%= data.background || 'paper' %>" id="enquiry">
+  <div class="container <%= data.show_details ? 'split split-form' : 'narrow' %>">
+    <div class="reveal">
+      <h2 class="section-title"><%= data.heading || settings.form_heading %></h2>
+      <% if (data.intro || settings.form_intro) { %><p class="lede"><%= data.intro || settings.form_intro %></p><% } %>
+      <% if (data.show_details) { %>
+        <ul class="contact-details">
+          <% if (settings.contact_email) { %><li><span>Email</span><a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a></li><% } %>
+          <% if (settings.contact_phone) { %><li><span>Phone</span><a href="tel:<%= settings.contact_phone.replace(/\s/g, '') %>"><%= settings.contact_phone %></a></li><% } %>
+          <% if (settings.contact_address) { %><li><span>Studio</span><%- h.escapeHtml(settings.contact_address).replace(/\n/g, '<br>') %></li><% } %>
+        </ul>
+      <% } %>
+    </div>
+
+    <form class="enquiry-form reveal" data-enquiry-form novalidate>
+      <div class="form-grid">
+        <% (source.fields || []).forEach(field => { %>
+          <div class="field field-<%= field.width || 'full' %>">
+            <label for="f-<%= field.name %>"><%= field.label %><%= field.is_required ? ' *' : '' %></label>
+            <% if (field.type === 'textarea') { %>
+              <textarea id="f-<%= field.name %>" name="<%= field.name %>" rows="5" placeholder="<%= field.placeholder %>" <%= field.is_required ? 'required' : '' %>></textarea>
+            <% } else if (field.type === 'select') { %>
+              <select id="f-<%= field.name %>" name="<%= field.name %>" <%= field.is_required ? 'required' : '' %>>
+                <option value="">Please choose…</option>
+                <% (field.options || []).forEach(opt => { %><option value="<%= opt %>"><%= opt %></option><% }) %>
+              </select>
+            <% } else if (field.type === 'checkboxes') { %>
+              <div class="checkbox-row">
+                <% (field.options || []).forEach(opt => { %>
+                  <label class="checkbox"><input type="checkbox" name="<%= field.name %>" value="<%= opt %>"> <span><%= opt %></span></label>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <input id="f-<%= field.name %>" name="<%= field.name %>" type="<%= field.type || 'text' %>" placeholder="<%= field.placeholder %>" <%= field.is_required ? 'required' : '' %>>
+            <% } %>
+            <% if (field.help) { %><p class="field-help"><%= field.help %></p><% } %>
+          </div>
+        <% }) %>
+      </div>
+      <input type="text" name="company_website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn btn-primary btn-lg" type="submit"><%= settings.form_submit_label || 'Send enquiry' %></button>
+      <p class="form-status" data-form-status role="status"></p>
+    </form>
+  </div>
+</section>

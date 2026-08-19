@@ -1,20 +1,25 @@
 {
-  "name": "lote-quote-builder",
+  "name": "lote-website",
   "version": "1.0.0",
-  "description": "Online quote builder with backend rates for team use",
+  "description": "LOTE Marketing website with a built-in CMS, plus the internal quote builder",
   "private": true,
   "scripts": {
     "server": "node server/index.js",
     "client": "cd client && npx react-scripts start",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "node server/index.js",
     "build": "cd client && npx react-scripts build",
-    "seed": "node server/seed.js",
-    "start": "node server/index.js"
+    "seed": "node server/seed.js && node server/cms/seed.js",
+    "start": "node server/index.js",
+    "dev:quote-builder": "concurrently \"npm run server\" \"npm run client\"",
+    "seed:cms": "node server/cms/seed.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "ejs": "^6.0.1",
     "express": "^4.21.0",
+    "multer": "^2.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

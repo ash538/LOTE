@@ -1,0 +1,24 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container">
+    <div class="section-head reveal">
+      <% if (data.eyebrow) { %><p class="eyebrow"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h2 class="section-title"><%= data.heading %></h2><% } %>
+      <% if (data.intro) { %><p class="lede"><%= data.intro %></p><% } %>
+    </div>
+    <div class="grid cols-4 team-grid">
+      <% (source.items || []).forEach(item => { %>
+        <div class="team-card reveal">
+          <div class="team-photo">
+            <% if (item.photo) { %><img src="<%= item.photo %>" alt="<%= item.name %>" loading="lazy">
+            <% } else { %><span><%= item.name.split(' ').map(p => p[0]).join('').slice(0, 2) %></span><% } %>
+          </div>
+          <h3><%= item.name %></h3>
+          <p class="team-role"><%= item.role %></p>
+          <% if (item.languages) { %><p class="team-languages"><%= item.languages %></p><% } %>
+          <% if (item.bio) { %><p class="team-bio"><%= item.bio %></p><% } %>
+          <% if (item.linkedin) { %><a class="team-link" href="<%= item.linkedin %>" target="_blank" rel="noopener">LinkedIn →</a><% } %>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

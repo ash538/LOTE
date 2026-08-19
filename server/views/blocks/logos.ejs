@@ -1,0 +1,14 @@
+<% if ((source.items || []).length) { %>
+<section class="section section-tight bg-<%= data.background || 'muted' %>">
+  <div class="container">
+    <% if (data.heading) { %><p class="eyebrow centred reveal"><%= data.heading %></p><% } %>
+    <div class="logo-row reveal">
+      <% source.items.forEach(item => { %>
+        <% if (item.url) { %><a href="<%= item.url %>" target="_blank" rel="noopener" class="logo-item"><% } else { %><span class="logo-item"><% } %>
+          <% if (item.logo) { %><img src="<%= item.logo %>" alt="<%= item.name %>" loading="lazy"><% } else { %><span class="logo-text"><%= item.name %></span><% } %>
+        <% if (item.url) { %></a><% } else { %></span><% } %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>

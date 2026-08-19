@@ -1,0 +1,17 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container split <%= data.image_side === 'left' ? 'split-reverse' : '' %>">
+    <div class="split-copy reveal">
+      <% if (data.eyebrow) { %><p class="eyebrow"><%= data.eyebrow %></p><% } %>
+      <% if (data.heading) { %><h2 class="section-title"><%= data.heading %></h2><% } %>
+      <div class="prose"><%- h.richText(data.body) %></div>
+      <% if ((data.links || []).length) { %>
+        <div class="btn-row">
+          <% data.links.forEach(link => { if (!link.label) return; %>
+            <a class="btn btn-<%= link.style || 'secondary' %>" href="<%= link.url || '#' %>"><%= link.label %></a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+    <% if (data.image) { %><div class="split-media reveal"><img src="<%= data.image %>" alt="" loading="lazy"></div><% } %>
+  </div>
+</section>

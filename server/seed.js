@@ -31,17 +31,30 @@ const rates = [
   { category: 'Project Management', name: 'Certification Fee', description: 'Certified translation statement', unit: 'per document', unit_price: 35.00 },
 ];
 
-console.log('Seeding rates...');
-const insert = db.prepare(`
-  INSERT OR IGNORE INTO rates (id, category, name, description, unit, unit_price)
-  VALUES (?, ?, ?, ?, ?, ?)
-`);
+// Idempotent: the rate card is only populated while it is empty, so this is
+// safe to run on every boot and every deploy.
+function seedRates() {
+  const existing = db.prepare('SELECT COUNT(*) AS n FROM rates').get().n;
+  if (existing > 0) return 0;
 
-const insertMany = db.transaction((items) => {
-  for (const item of items) {
-    insert.run(uuidv4(), item.category, item.name, item.description, item.unit, item.unit_price);
-  }
-});
+  const insert = db.prepare(`
+    INSERT INTO rates (id, category, name, description, unit, unit_price)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
 
-insertMany(rates);
-console.log(`Seeded ${rates.length} rates successfully.`);
+  const insertMany = db.transaction((items) => {
+    for (const item of items) {
+      insert.run(uuidv4(), item.category, item.name, item.description, item.unit, item.unit_price);
+    }
+  });
+
+  insertMany(rates);
+  return rates.length;
+}
+
+if (require.main === module) {
+  const n = seedRates();
+  console.log(n ? `Seeded ${n} rates successfully.` : 'Rate card already populated — nothing to do.');
+}
+
+module.exports = seedRates;

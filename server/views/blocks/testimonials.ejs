@@ -1,0 +1,18 @@
+<% if ((source.items || []).length) { %>
+<section class="section bg-<%= data.background || 'primary' %>">
+  <div class="container">
+    <% if (data.heading) { %><h2 class="section-title centred reveal"><%= data.heading %></h2><% } %>
+    <div class="quote-grid">
+      <% source.items.forEach(item => { %>
+        <figure class="quote reveal">
+          <blockquote>“<%= item.quote %>”</blockquote>
+          <figcaption>
+            <% if (item.photo) { %><img src="<%= item.photo %>" alt="" loading="lazy"><% } %>
+            <span><strong><%= item.person %></strong><% if (item.role || item.org) { %><br><%= [item.role, item.org].filter(Boolean).join(', ') %><% } %></span>
+          </figcaption>
+        </figure>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>

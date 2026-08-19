@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head') %></head>
+<body>
+  <%- include('partials/header') %>
+  <main id="main">
+    <article>
+      <section class="section page-head bg-muted">
+        <div class="container">
+          <p class="eyebrow reveal"><a href="/work">Work</a> <%= item.client ? '· ' + item.client : '' %></p>
+          <h1 class="display reveal"><%= item.title %></h1>
+          <p class="lede reveal"><%= item.summary %></p>
+          <dl class="fact-row reveal">
+            <% if (item.client) { %><div><dt>Client</dt><dd><%= item.client %></dd></div><% } %>
+            <% if (item.sector) { %><div><dt>Sector</dt><dd><%= item.sector %></dd></div><% } %>
+            <% if (item.year) { %><div><dt>Year</dt><dd><%= item.year %></dd></div><% } %>
+            <% if ((item.service_tags || []).length) { %><div><dt>Services</dt><dd><%= item.service_tags.join(', ') %></dd></div><% } %>
+          </dl>
+        </div>
+      </section>
+
+      <% if (item.hero_image) { %>
+        <div class="container"><figure class="hero-figure reveal"><img src="<%= item.hero_image %>" alt="" loading="lazy"></figure></div>
+      <% } %>
+
+      <% if ((item.results || []).length) { %>
+        <section class="section section-tight bg-primary">
+          <div class="container">
+            <div class="stats-row">
+              <% item.results.forEach(r => { %>
+                <div class="stat reveal"><span class="stat-value"><%= r.value %></span><span class="stat-label"><%= r.label %></span></div>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+      <% } %>
+
+      <section class="section">
+        <div class="container narrow prose reveal">
+          <% if (item.challenge) { %><h2>The challenge</h2><%- h.richText(item.challenge) %><% } %>
+          <% if (item.approach) { %><h2>Our approach</h2><%- h.richText(item.approach) %><% } %>
+          <%- h.richText(item.body) %>
+        </div>
+      </section>
+
+      <% if ((item.gallery || []).length) { %>
+        <section class="section section-tight">
+          <div class="container"><div class="grid cols-3 gallery">
+            <% item.gallery.filter(Boolean).forEach(src => { %><figure class="reveal"><img src="<%= src %>" alt="" loading="lazy"></figure><% }) %>
+          </div></div>
+        </section>
+      <% } %>
+
+      <% if ((item.related || []).length) { %>
+        <section class="section bg-muted">
+          <div class="container">
+            <h2 class="section-title reveal">More work</h2>
+            <div class="work-grid">
+              <% item.related.forEach(rel => { %>
+                <a class="work-card reveal" href="/work/<%= rel.slug %>">
+                  <div class="work-card-media">
+                    <% if (rel.thumbnail || rel.hero_image) { %><img src="<%= rel.thumbnail || rel.hero_image %>" alt="" loading="lazy">
+                    <% } else { %><span class="work-card-placeholder"><b><%= (rel.client || rel.title).slice(0, 2).toUpperCase() %></b><em><%= rel.client || rel.sector || 'Case study' %></em></span><% } %>
+                  </div>
+                  <div class="work-card-body">
+                    <p class="work-meta"><%= [rel.client, rel.year].filter(Boolean).join(' · ') %></p>
+                    <h3><%= rel.title %></h3>
+                  </div>
+                </a>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+      <% } %>
+    </article>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

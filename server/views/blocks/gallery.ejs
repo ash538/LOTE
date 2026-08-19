@@ -1,0 +1,10 @@
+<section class="section bg-<%= data.background || 'paper' %>">
+  <div class="container">
+    <% if (data.heading) { %><h2 class="section-title reveal"><%= data.heading %></h2><% } %>
+    <div class="grid cols-<%= data.columns || 3 %> gallery">
+      <% (data.images || []).filter(Boolean).forEach(src => { %>
+        <figure class="reveal"><img src="<%= src %>" alt="" loading="lazy"></figure>
+      <% }) %>
+    </div>
+  </div>
+</section>

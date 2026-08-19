@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head') %></head>
+<body>
+  <%- include('partials/header') %>
+  <main id="main">
+    <section class="section page-head bg-muted">
+      <div class="container split">
+        <div class="reveal">
+          <p class="eyebrow"><a href="/services">Services</a></p>
+          <h1 class="display"><%= item.title %></h1>
+          <p class="lede"><%= item.summary %></p>
+          <div class="btn-row"><a class="btn btn-primary" href="/contact">Enquire about <%= item.title.toLowerCase() %></a></div>
+        </div>
+        <% if (item.image) { %><div class="split-media reveal"><img src="<%= item.image %>" alt="" loading="lazy"></div><% } %>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split split-sticky">
+        <div class="prose reveal"><%- h.richText(item.body) %></div>
+        <aside class="sidebar reveal">
+          <% if ((item.capabilities || []).length) { %>
+            <h3>What's included</h3>
+            <ul class="tick-list">
+              <% item.capabilities.forEach(cap => { %><li><%= cap %></li><% }) %>
+            </ul>
+          <% } %>
+          <% if (otherServices.length) { %>
+            <h3>Other services</h3>
+            <ul class="link-list">
+              <% otherServices.forEach(s => { %><li><a href="/services/<%= s.slug %>"><%= s.title %> →</a></li><% }) %>
+            </ul>
+          <% } %>
+        </aside>
+      </div>
+    </section>
+
+    <% if (relatedWork.length) { %>
+      <section class="section bg-muted">
+        <div class="container">
+          <h2 class="section-title reveal">Related work</h2>
+          <div class="work-grid">
+            <% relatedWork.forEach(rel => { %>
+              <a class="work-card reveal" href="/work/<%= rel.slug %>">
+                <div class="work-card-media">
+                  <% if (rel.thumbnail || rel.hero_image) { %><img src="<%= rel.thumbnail || rel.hero_image %>" alt="" loading="lazy">
+                  <% } else { %><span class="work-card-placeholder"><b><%= (rel.client || rel.title).slice(0, 2).toUpperCase() %></b><em><%= rel.client || rel.sector || 'Case study' %></em></span><% } %>
+                </div>
+                <div class="work-card-body">
+                  <p class="work-meta"><%= [rel.client, rel.year].filter(Boolean).join(' · ') %></p>
+                  <h3><%= rel.title %></h3>
+                </div>
+              </a>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<section class="section cta-banner bg-<%= data.background || 'accent' %>">
+  <div class="container centred">
+    <% if (data.heading) { %><h2 class="display-sm reveal"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br>') %></h2><% } %>
+    <% if (data.text) { %><p class="lede reveal"><%= data.text %></p><% } %>
+    <% if ((data.links || []).length) { %>
+      <div class="btn-row centred reveal">
+        <% data.links.forEach(link => { if (!link.label) return; %>
+          <a class="btn btn-<%= link.style || 'primary' %> btn-lg" href="<%= link.url || '#' %>"><%= link.label %></a>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>

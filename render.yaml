@@ -1,9 +1,20 @@
 services:
   - type: web
-    name: lote-quote-builder
+    name: lote-website
     runtime: node
     buildCommand: npm install && cd client && npm install && npm run build && cd .. && npm run seed
     startCommand: npm start
+    # The SQLite database and uploaded images must survive a redeploy.
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

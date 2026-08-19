@@ -1,0 +1,53 @@
+<% if (preview) { %>
+<div class="preview-bar">
+  Preview mode — drafts and hidden sections are visible.
+  <a href="<%= currentPath %>">Exit preview</a>
+  <a href="/admin">Back to admin</a>
+</div>
+<% } %>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a class="brand" href="/">
+      <% if (settings.logo_image) { %>
+        <img src="<%= settings.logo_image %>" alt="<%= settings.site_name %>" style="height: <%= settings.logo_image_height || 34 %>px">
+      <% } else { %>
+        <span class="brand-mark"><%= settings.logo_text || settings.site_name %></span>
+      <% } %>
+    </a>
+
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <% nav.filter(item => !item.is_button).forEach(item => { %>
+          <li>
+            <a href="<%= item.url %>"
+               class="<%= currentPath === item.url || (item.url !== '/' && currentPath.startsWith(item.url)) ? 'is-current' : '' %>"
+               <% if (item.new_tab) { %>target="_blank" rel="noopener"<% } %>><%= item.label %></a>
+          </li>
+        <% }) %>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <% nav.filter(item => item.is_button).forEach(item => { %>
+        <a class="btn btn-primary btn-sm" href="<%= item.url %>" <% if (item.new_tab) { %>target="_blank" rel="noopener"<% } %>><%= item.label %></a>
+      <% }) %>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-nav-toggle>
+        <span class="sr-only">Menu</span>
+        <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav" hidden data-mobile-nav>
+    <ul>
+      <% nav.forEach(item => { %>
+        <li><a href="<%= item.url %>"><%= item.label %></a></li>
+      <% }) %>
+    </ul>
+    <div class="mobile-nav-contact">
+      <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a>
+      <a href="tel:<%= (settings.contact_phone || '').replace(/\s/g, '') %>"><%= settings.contact_phone %></a>
+    </div>
+  </div>
+</header>

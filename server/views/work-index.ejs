@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head') %></head>
+<body>
+  <%- include('partials/header') %>
+  <main id="main">
+    <section class="section page-head bg-muted">
+      <div class="container">
+        <p class="eyebrow reveal">Case studies</p>
+        <h1 class="display reveal"><%= intro && intro.title ? intro.title : 'Work that reaches people' %></h1>
+        <p class="lede reveal">Campaigns, strategies and creative built for culturally and linguistically diverse audiences.</p>
+        <% if (sectors.length) { %>
+          <div class="filter-row reveal">
+            <a class="chip <%= activeSector ? '' : 'is-active' %>" href="/work">All</a>
+            <% sectors.forEach(sector => { %>
+              <a class="chip <%= activeSector === sector ? 'is-active' : '' %>" href="/work?sector=<%= encodeURIComponent(sector) %>"><%= sector %></a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <% if (!items.length) { %><p class="lede">No case studies published yet.</p><% } %>
+        <div class="work-grid">
+          <% items.forEach(item => { %>
+            <a class="work-card reveal" href="/work/<%= item.slug %>">
+              <div class="work-card-media">
+                <% if (item.thumbnail || item.hero_image) { %><img src="<%= item.thumbnail || item.hero_image %>" alt="" loading="lazy">
+                <% } else { %><span class="work-card-placeholder"><b><%= (item.client || item.title).slice(0, 2).toUpperCase() %></b><em><%= item.client || item.sector || 'Case study' %></em></span><% } %>
+              </div>
+              <div class="work-card-body">
+                <p class="work-meta"><%= [item.client, item.sector, item.year].filter(Boolean).join(' · ') %></p>
+                <h3><%= item.title %></h3>
+                <p><%= item.summary %></p>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

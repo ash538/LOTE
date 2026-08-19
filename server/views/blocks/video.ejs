@@ -1,0 +1,13 @@
+<section class="section bg-<%= data.background || 'ink' %>">
+  <div class="container narrow">
+    <% if (data.heading) { %><h2 class="section-title reveal"><%= data.heading %></h2><% } %>
+    <% if (data.embed_url) { %>
+      <div class="video-frame reveal">
+        <iframe src="<%= data.embed_url %>" title="<%= data.heading || 'Video' %>" loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>
+    <% } %>
+    <% if (data.caption) { %><p class="caption reveal"><%= data.caption %></p><% } %>
+  </div>
+</section>

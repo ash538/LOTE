@@ -6,3 +6,5 @@ client/build/
 *.db-wal
 .env
 .DS_Store
+uploads/*
+!uploads/.gitkeep
