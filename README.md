@@ -18,11 +18,15 @@ npm run seed     # rate card + starter website content (safe to re-run)
 npm start        # http://localhost:4000
 ```
 
-Sign in at `/admin` with `admin@lotemarketing.com.au` / `changeme123`, then
-change the password under **Account**. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD`
-before the first boot to choose your own credentials instead — in production
-with no `ADMIN_PASSWORD` set, a random one is generated and printed to the
-startup log rather than falling back to a known default.
+The first boot prints the generated sign-in to the startup log:
+
+```
+[cms] Created admin admin@lotemarketing.com.au with the password "xxxxxxxxxxxx"
+```
+
+Sign in at `/admin` with that, then change it under **Account**. Set
+`ADMIN_EMAIL` and `ADMIN_PASSWORD` before the first boot to choose your own
+instead. There is no default password — an unset one is always random.
 
 Accounts come in two roles. **Editors** manage all content; **admins**
 additionally control site settings (which can inject scripts and CSS) and who

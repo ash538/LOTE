@@ -1,0 +1,24 @@
+<% const essayUrl = data.file || data.button_url; %>
+<section class="section writing" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="shell writing-grid">
+    <div>
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+    </div>
+    <div>
+      <% if (data.summary) { %><p class="writing-copy"><%= data.summary %></p><% } %>
+      <% if (essayUrl && data.button_label) { %>
+        <div class="writing-actions">
+          <a class="button" href="<%= essayUrl %>" target="_blank" rel="noreferrer"><%= data.button_label %></a>
+          <% if (data.meta) { %><span class="eyebrow accent"><%= data.meta %></span><% } %>
+        </div>
+      <% } %>
+      <% if (data.note_title || data.note_text) { %>
+        <% if (data.note_url) { %><a class="note-box" href="<%= data.note_url %>" target="_blank" rel="noreferrer"><% } else { %><div class="note-box"><% } %>
+          <% if (data.note_title) { %><b><%= data.note_title %></b><% } %>
+          <% if (data.note_text) { %><span><%= data.note_text %></span><% } %>
+        <% if (data.note_url) { %></a><% } else { %></div><% } %>
+      <% } %>
+    </div>
+  </div>
+</section>

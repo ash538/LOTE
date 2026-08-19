@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en-AU">
+<head><%- include('partials/head') %></head>
+<body>
+  <%- include('partials/header') %>
+  <main id="top">
+    <% page.blocks.forEach(block => {
+         const meta = blockMeta[block.type];
+         if (!meta) return;
+         const data = Object.assign({}, meta.defaults || {}, block.data || {});
+         const source = resolveBlockSource(block); %>
+      <% if (preview && !block.is_visible) { %><div class="preview-flag">Hidden section — <%= meta.label %></div><% } %>
+      <%- include('blocks/' + meta.template, { block, data, source, settings, h, preview }) %>
+    <% }) %>
+    <% if (!page.blocks.length) { %>
+      <section class="section shell"><h1 class="display"><%= page.title %></h1>
+      <p class="copy">No sections yet — add them in the admin.</p></section>
+    <% } %>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

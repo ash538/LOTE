@@ -1,0 +1,19 @@
+{
+  "name": "ashchand-site",
+  "version": "1.0.0",
+  "description": "ashchand.com.au — personal site with a built-in CMS",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "multer": "^2.0.0",
+    "uuid": "^9.0.0"
+  }
+}

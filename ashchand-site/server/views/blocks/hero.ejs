@@ -1,0 +1,26 @@
+<section class="hero shell" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="hero-inner">
+    <% if (data.kicker) { %>
+      <div class="hero-kicker eyebrow"><i></i> <%= data.kicker %></div>
+    <% } %>
+    <div class="hero-grid<%= data.portrait ? '' : ' hero-grid-solo' %>">
+      <div>
+        <h1 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h1>
+        <% if (data.intro) { %><p class="hero-intro"><%= data.intro %></p><% } %>
+        <% if (data.link_label || data.button_label) { %>
+          <div class="hero-actions">
+            <% if (data.link_label) { %><a class="signal" href="<%= data.link_url || '#' %>"><%= data.link_label %></a><% } %>
+            <% if (data.button_label) { %><a class="button" href="<%= data.button_url || '#contact' %>"><%= data.button_label %></a><% } %>
+          </div>
+        <% } %>
+      </div>
+      <% if (data.portrait) { %>
+        <div class="portrait">
+          <img src="<%= data.portrait %>" alt="<%= data.portrait_alt || '' %>" />
+          <% if (data.portrait_label) { %><span class="portrait-label"><%- h.escapeHtml(data.portrait_label).replace(/\n/g, '<br />') %></span><% } %>
+          <% if (data.portrait_caption) { %><span class="portrait-caption"><%= data.portrait_caption %></span><% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>

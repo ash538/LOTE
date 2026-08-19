@@ -19,17 +19,17 @@
 <link rel="stylesheet" href="/assets/site.css">
 <style>
   :root {
-    --paper: <%= settings.color_paper %>;
-    --ink: <%= settings.color_ink %>;
-    --primary: <%= settings.color_primary %>;
-    --accent: <%= settings.color_accent %>;
-    --muted: <%= settings.color_muted %>;
-    --footer-bg: <%= settings.color_footer %>;
-    --font-heading: <%= settings.font_heading %>;
-    --font-body: <%= settings.font_body %>;
-    --heading-scale: <%= settings.heading_scale || 1 %>;
-    --radius: <%= settings.radius || 18 %>px;
-    --container: <%= settings.container_width || 1240 %>px;
+    --paper: <%- h.cssValue(settings.color_paper) %>;
+    --ink: <%- h.cssValue(settings.color_ink) %>;
+    --primary: <%- h.cssValue(settings.color_primary) %>;
+    --accent: <%- h.cssValue(settings.color_accent) %>;
+    --muted: <%- h.cssValue(settings.color_muted) %>;
+    --footer-bg: <%- h.cssValue(settings.color_footer) %>;
+    --font-heading: <%- h.cssValue(settings.font_heading) %>;
+    --font-body: <%- h.cssValue(settings.font_body) %>;
+    --heading-scale: <%- h.cssValue(settings.heading_scale || 1) %>;
+    --radius: <%- h.cssValue(settings.radius || 18) %>px;
+    --container: <%- h.cssValue(settings.container_width || 1240) %>px;
     --btn-radius: <%= settings.button_style === 'square' ? '0px' : settings.button_style === 'rounded' ? '10px' : '999px' %>;
   }
 </style>

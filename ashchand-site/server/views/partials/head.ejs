@@ -1,0 +1,40 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="<%= seo.description %>" />
+<meta name="theme-color" content="<%= settings.color_paper %>" />
+<title><%= seo.title %></title>
+<% if (seo.canonical) { %><link rel="canonical" href="<%= seo.canonical %>" /><% } %>
+<meta property="og:type" content="website" />
+<meta property="og:title" content="<%= seo.title %>" />
+<meta property="og:description" content="<%= seo.description %>" />
+<% if (seo.image) { %><meta property="og:image" content="<%= seo.image %>" /><% } %>
+<meta name="twitter:card" content="<%= seo.image ? 'summary_large_image' : 'summary' %>" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22><%= encodeURIComponent(settings.favicon_emoji || '◆') %></text></svg>" />
+<% if (settings.font_import_url) { %>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="<%= settings.font_import_url %>" rel="stylesheet" />
+<% } %>
+<link rel="stylesheet" href="/assets/site.css" />
+<style>
+  :root {
+    --paper: <%- h.cssValue(settings.color_paper) %>;
+    --ink: <%- h.cssValue(settings.color_ink) %>;
+    --oxblood: <%- h.cssValue(settings.color_oxblood) %>;
+    --butter: <%- h.cssValue(settings.color_butter) %>;
+    --muted: <%- h.cssValue(settings.color_muted) %>;
+    --serif: <%- h.cssValue(settings.font_serif) %>;
+    --sans: <%- h.cssValue(settings.font_sans) %>;
+  }
+</style>
+<% if (settings.custom_css) { %><style><%- settings.custom_css %></style><% } %>
+<% if (settings.analytics_id) { %>
+<script async src="https://www.googletagmanager.com/gtag/js?id=<%= settings.analytics_id %>"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '<%= settings.analytics_id %>');
+</script>
+<% } %>
+<% if (settings.head_scripts) { %><%- settings.head_scripts %><% } %>

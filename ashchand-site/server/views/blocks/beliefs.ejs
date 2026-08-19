@@ -1,0 +1,21 @@
+<section class="section shell" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="section-grid">
+    <div class="section-title">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+      <% if (data.intro) { %><p class="copy"><%= data.intro %></p><% } %>
+    </div>
+    <div class="beliefs">
+      <% (data.items || []).forEach((item, i) => { %>
+        <article class="belief">
+          <div class="belief-top">
+            <span class="eyebrow accent"><%= String(i + 1).padStart(2, '0') %> / <%= item.eyebrow %></span>
+            <span aria-hidden="true">↗</span>
+          </div>
+          <h3><%- h.escapeHtml(item.heading).replace(/\n/g, '<br />') %></h3>
+          <% if (item.text) { %><p><%= item.text %></p><% } %>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>

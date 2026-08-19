@@ -1,0 +1,7 @@
+<section class="section shell bg-<%= data.background || 'paper' %>" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="text-block">
+    <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+    <% if (data.heading) { %><h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2><% } %>
+    <div class="prose"><%- h.richText(data.body) %></div>
+  </div>
+</section>

@@ -26,7 +26,10 @@ function throttled(ip) {
 
 // POST /api/site/enquiries — the public enquiry form.
 router.post('/enquiries', (req, res) => {
-  const { fields = {}, source_page = '', company_website = '' } = req.body || {};
+  const body = req.body || {};
+  const fields = body.fields && typeof body.fields === 'object' ? body.fields : {};
+  const source_page = body.source_page || '';
+  const company_website = body.company_website || '';
 
   // Honeypot: real people never fill this in.
   if (company_website) return res.json({ ok: true, message: settingsStore.get('form_success_message') });
@@ -83,10 +86,7 @@ router.post('/enquiries', (req, res) => {
   res.status(201).json({ ok: true, message: settingsStore.get('form_success_message') });
 });
 
-// Read-only JSON feeds, handy for embedding the content elsewhere.
-router.get('/services', (req, res) => res.json(content.listServices({})));
-router.get('/work', (req, res) => res.json(content.listWork({ limit: req.query.limit || null })));
-router.get('/insights', (req, res) => res.json(content.listInsights({ limit: req.query.limit || null })));
+// The form definition, so the enquiry form can be rendered elsewhere too.
 router.get('/form-fields', (req, res) => res.json(content.listFormFields()));
 
 module.exports = router;

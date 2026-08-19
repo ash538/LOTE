@@ -10,62 +10,17 @@ const content = require('../content');
 const settingsStore = require('../settings');
 const { BLOCKS, defaultsFor } = require('../blocks');
 const { uniqueSlug, parseJson, boolInt, slugify } = require('../helpers');
+const { UPLOAD_DIR } = require('../paths');
 
 const router = express.Router();
 
-// --- Collection definitions ------------------------------------------------
-// One place that says what an editor may write to each table.
+// --- Editable collections --------------------------------------------------
+// This site keeps its content in page sections; only the menus and the enquiry
+// form are list-shaped.
 const COLLECTIONS = {
-  services: {
-    table: 'services',
-    slugFrom: 'title',
-    fields: ['title', 'slug', 'summary', 'body', 'icon', 'image', 'status', 'seo_description'],
-    jsonFields: ['capabilities'],
-    boolFields: ['is_featured'],
-    order: 'sort_order, title',
-  },
-  work: {
-    table: 'work',
-    slugFrom: 'title',
-    fields: ['title', 'slug', 'client', 'sector', 'year', 'summary', 'challenge', 'approach', 'body',
-      'hero_image', 'thumbnail', 'status', 'seo_description'],
-    jsonFields: ['gallery', 'results', 'service_tags'],
-    boolFields: ['is_featured'],
-    order: 'sort_order, created_at DESC',
-  },
-  insights: {
-    table: 'insights',
-    slugFrom: 'title',
-    fields: ['title', 'slug', 'excerpt', 'body', 'category', 'author', 'hero_image', 'published_at',
-      'status', 'seo_description'],
-    jsonFields: [],
-    boolFields: ['is_featured'],
-    order: 'published_at DESC',
-  },
-  team: {
-    table: 'team',
-    fields: ['name', 'role', 'bio', 'photo', 'email', 'linkedin', 'languages', 'status'],
-    jsonFields: [],
-    boolFields: [],
-    order: 'sort_order, name',
-  },
-  testimonials: {
-    table: 'testimonials',
-    fields: ['quote', 'person', 'role', 'org', 'photo', 'status'],
-    jsonFields: [],
-    boolFields: [],
-    order: 'sort_order',
-  },
-  clients: {
-    table: 'clients',
-    fields: ['name', 'logo', 'url', 'status'],
-    jsonFields: [],
-    boolFields: [],
-    order: 'sort_order, name',
-  },
   nav: {
     table: 'nav_items',
-    fields: ['location', 'label', 'url', 'group_label'],
+    fields: ['location', 'label', 'url'],
     jsonFields: [],
     boolFields: ['is_button', 'new_tab'],
     order: 'location, sort_order',
@@ -78,9 +33,6 @@ const COLLECTIONS = {
     order: 'sort_order',
   },
 };
-
-const hasColumn = (table, column) =>
-  db.prepare(`PRAGMA table_info(${table})`).all().some(c => c.name === column);
 
 // Two fields sharing a key would overwrite each other in the submitted data.
 function uniqueFieldName(base, ignoreId) {
@@ -106,17 +58,11 @@ function buildValues(def, body, { existing = null } = {}) {
   for (const field of def.boolFields || []) {
     if (body[field] !== undefined) values[field] = boolInt(body[field]);
   }
-  if (body.sort_order !== undefined && hasColumn(def.table, 'sort_order')) {
-    values.sort_order = Number(body.sort_order) || 0;
-  }
+  if (body.sort_order !== undefined) values.sort_order = Number(body.sort_order) || 0;
 
-  if (def.slugFrom) {
-    const wanted = values.slug || body.slug || (existing ? existing.slug : '') || values[def.slugFrom] || body[def.slugFrom];
-    values.slug = uniqueSlug(db, def.table, wanted, existing ? existing.id : null);
-  }
-  // A form field always needs a usable key: clearing the box in the admin
-  // regenerates it from the label rather than saving an empty name, which
-  // would break every submission of the public form.
+  // A form field always needs a usable key: clearing the box regenerates it
+  // from the label rather than saving an empty name, which would break the
+  // public form.
   if (def.table === 'form_fields' && (values.name !== undefined || !existing)) {
     const source = values.name || values.label || (existing && existing.label) || 'field';
     values.name = uniqueFieldName(slugify(source, 'field').replace(/-/g, '_'), existing ? existing.id : null);
@@ -125,29 +71,13 @@ function buildValues(def, body, { existing = null } = {}) {
 }
 
 function nextSortOrder(table) {
-  if (!hasColumn(table, 'sort_order')) return 0;
-  const row = db.prepare(`SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM ${table}`).get();
-  return row.n;
-}
-
-function listCollection(key) {
-  const def = COLLECTIONS[key];
-  const rows = db.prepare(`SELECT * FROM ${def.table} ORDER BY ${def.order}`).all();
-  return content.hydrateAll(def.table, rows);
+  return db.prepare(`SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM ${table}`).get().n;
 }
 
 router.get('/collections/:key', auth.requireAuth, (req, res) => {
   const def = COLLECTIONS[req.params.key];
   if (!def) return res.status(404).json({ error: 'Unknown collection' });
-  res.json(listCollection(req.params.key));
-});
-
-router.get('/collections/:key/:id', auth.requireAuth, (req, res) => {
-  const def = COLLECTIONS[req.params.key];
-  if (!def) return res.status(404).json({ error: 'Unknown collection' });
-  const row = db.prepare(`SELECT * FROM ${def.table} WHERE id = ?`).get(req.params.id);
-  if (!row) return res.status(404).json({ error: 'Not found' });
-  res.json(content.hydrate(def.table, row));
+  res.json(content.hydrateAll(def.table, db.prepare(`SELECT * FROM ${def.table} ORDER BY ${def.order}`).all()));
 });
 
 router.post('/collections/:key', auth.requireAuth, (req, res) => {
@@ -162,8 +92,7 @@ router.post('/collections/:key', auth.requireAuth, (req, res) => {
   db.prepare(`INSERT INTO ${def.table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`)
     .run(...cols.map(c => values[c]));
 
-  const row = db.prepare(`SELECT * FROM ${def.table} WHERE id = ?`).get(values.id);
-  res.status(201).json(content.hydrate(def.table, row));
+  res.status(201).json(content.hydrate(def.table, db.prepare(`SELECT * FROM ${def.table} WHERE id = ?`).get(values.id)));
 });
 
 router.put('/collections/:key/:id', auth.requireAuth, (req, res) => {
@@ -176,13 +105,11 @@ router.put('/collections/:key/:id', auth.requireAuth, (req, res) => {
   const values = buildValues(def, req.body || {}, { existing });
   const cols = Object.keys(values);
   if (cols.length) {
-    const setSql = cols.map(c => `${c} = ?`).join(', ');
-    const touch = hasColumn(def.table, 'updated_at') ? ", updated_at = datetime('now')" : '';
-    db.prepare(`UPDATE ${def.table} SET ${setSql}${touch} WHERE id = ?`).run(...cols.map(c => values[c]), req.params.id);
+    db.prepare(`UPDATE ${def.table} SET ${cols.map(c => `${c} = ?`).join(', ')}, updated_at = datetime('now') WHERE id = ?`)
+      .run(...cols.map(c => values[c]), req.params.id);
   }
 
-  const row = db.prepare(`SELECT * FROM ${def.table} WHERE id = ?`).get(req.params.id);
-  res.json(content.hydrate(def.table, row));
+  res.json(content.hydrate(def.table, db.prepare(`SELECT * FROM ${def.table} WHERE id = ?`).get(req.params.id)));
 });
 
 router.delete('/collections/:key/:id', auth.requireAuth, (req, res) => {
@@ -192,7 +119,6 @@ router.delete('/collections/:key/:id', auth.requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// Drag-and-drop reordering.
 router.post('/collections/:key/reorder', auth.requireAuth, (req, res) => {
   const def = COLLECTIONS[req.params.key];
   if (!def) return res.status(404).json({ error: 'Unknown collection' });
@@ -202,7 +128,7 @@ router.post('/collections/:key/reorder', auth.requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// --- Pages & blocks --------------------------------------------------------
+// --- Pages & sections ------------------------------------------------------
 router.get('/pages', auth.requireAuth, (req, res) => res.json(content.listPages()));
 
 router.get('/pages/:id', auth.requireAuth, (req, res) => {
@@ -214,14 +140,12 @@ router.get('/pages/:id', auth.requireAuth, (req, res) => {
 router.post('/pages', auth.requireAuth, (req, res) => {
   const body = req.body || {};
   const id = uuidv4();
-  const slug = uniqueSlug(db, 'pages', body.slug || body.title || 'page');
   db.prepare(`
-    INSERT INTO pages (id, slug, title, nav_label, status, show_in_nav, sort_order, seo_title, seo_description, og_image)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pages (id, slug, title, status, sort_order, seo_title, seo_description, og_image)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    id, slug, body.title || 'Untitled page', body.nav_label || '', body.status || 'draft',
-    boolInt(body.show_in_nav), Number(body.sort_order) || nextSortOrder('pages'),
-    body.seo_title || '', body.seo_description || '', body.og_image || ''
+    id, uniqueSlug(db, 'pages', body.slug || body.title || 'page'), body.title || 'Untitled page',
+    body.status || 'draft', nextSortOrder('pages'), body.seo_title || '', body.seo_description || '', body.og_image || ''
   );
   res.status(201).json(db.prepare('SELECT * FROM pages WHERE id = ?').get(id));
 });
@@ -231,24 +155,17 @@ router.put('/pages/:id', auth.requireAuth, (req, res) => {
   if (!page) return res.status(404).json({ error: 'Page not found' });
 
   const body = req.body || {};
-  // Routed pages (home, contact…) keep their slug so links never break.
   const slug = page.is_locked ? page.slug : uniqueSlug(db, 'pages', body.slug || body.title || page.slug, page.id);
+  const pick = (key) => (body[key] !== undefined ? body[key] : page[key]);
 
   db.prepare(`
-    UPDATE pages SET slug = ?, title = ?, nav_label = ?, status = ?, show_in_nav = ?,
-      sort_order = ?, seo_title = ?, seo_description = ?, og_image = ?, updated_at = datetime('now')
+    UPDATE pages SET slug = ?, title = ?, status = ?, sort_order = ?,
+      seo_title = ?, seo_description = ?, og_image = ?, updated_at = datetime('now')
     WHERE id = ?
   `).run(
-    slug,
-    body.title !== undefined ? body.title : page.title,
-    body.nav_label !== undefined ? body.nav_label : page.nav_label,
-    body.status !== undefined ? body.status : page.status,
-    body.show_in_nav !== undefined ? boolInt(body.show_in_nav) : page.show_in_nav,
+    slug, pick('title'), pick('status'),
     body.sort_order !== undefined ? Number(body.sort_order) : page.sort_order,
-    body.seo_title !== undefined ? body.seo_title : page.seo_title,
-    body.seo_description !== undefined ? body.seo_description : page.seo_description,
-    body.og_image !== undefined ? body.og_image : page.og_image,
-    page.id
+    pick('seo_title'), pick('seo_description'), pick('og_image'), page.id
   );
   res.json(db.prepare('SELECT * FROM pages WHERE id = ?').get(page.id));
 });
@@ -256,7 +173,7 @@ router.put('/pages/:id', auth.requireAuth, (req, res) => {
 router.delete('/pages/:id', auth.requireAuth, (req, res) => {
   const page = db.prepare('SELECT * FROM pages WHERE id = ?').get(req.params.id);
   if (!page) return res.status(404).json({ error: 'Page not found' });
-  if (page.is_locked) return res.status(400).json({ error: 'This page is part of the site structure and cannot be deleted.' });
+  if (page.is_locked) return res.status(400).json({ error: 'The home page cannot be deleted.' });
   db.prepare('DELETE FROM pages WHERE id = ?').run(page.id);
   res.json({ ok: true });
 });
@@ -266,27 +183,28 @@ router.get('/block-types', auth.requireAuth, (req, res) => res.json(BLOCKS));
 router.post('/pages/:pageId/blocks', auth.requireAuth, (req, res) => {
   const page = db.prepare('SELECT id FROM pages WHERE id = ?').get(req.params.pageId);
   if (!page) return res.status(404).json({ error: 'Page not found' });
-
-  const type = req.body.type;
-  if (!BLOCKS.some(b => b.type === type)) return res.status(400).json({ error: 'Unknown block type' });
+  if (!BLOCKS.some(b => b.type === req.body.type)) return res.status(400).json({ error: 'Unknown section type' });
 
   const id = uuidv4();
   const next = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM blocks WHERE page_id = ?').get(page.id).n;
-  const data = Object.assign(defaultsFor(type), parseJson(req.body.data, {}));
+  const data = Object.assign(defaultsFor(req.body.type), parseJson(req.body.data, {}));
   db.prepare('INSERT INTO blocks (id, page_id, type, data, sort_order) VALUES (?, ?, ?, ?, ?)')
-    .run(id, page.id, type, JSON.stringify(data), next);
+    .run(id, page.id, req.body.type, JSON.stringify(data), next);
 
   res.status(201).json(content.hydrate('blocks', db.prepare('SELECT * FROM blocks WHERE id = ?').get(id)));
 });
 
 router.put('/blocks/:id', auth.requireAuth, (req, res) => {
   const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(req.params.id);
-  if (!block) return res.status(404).json({ error: 'Block not found' });
+  if (!block) return res.status(404).json({ error: 'Section not found' });
 
   const data = req.body.data !== undefined ? JSON.stringify(parseJson(req.body.data, {})) : block.data;
   const visible = req.body.is_visible !== undefined ? boolInt(req.body.is_visible) : block.is_visible;
-  db.prepare("UPDATE blocks SET data = ?, is_visible = ?, updated_at = datetime('now') WHERE id = ?")
-    .run(data, visible, block.id);
+  // The anchor is what the nav links to, so keep it URL-safe.
+  const anchor = req.body.anchor !== undefined ? slugify(req.body.anchor, '') : block.anchor;
+
+  db.prepare("UPDATE blocks SET data = ?, is_visible = ?, anchor = ?, updated_at = datetime('now') WHERE id = ?")
+    .run(data, visible, anchor, block.id);
 
   res.json(content.hydrate('blocks', db.prepare('SELECT * FROM blocks WHERE id = ?').get(block.id)));
 });
@@ -298,10 +216,11 @@ router.delete('/blocks/:id', auth.requireAuth, (req, res) => {
 
 router.post('/blocks/:id/duplicate', auth.requireAuth, (req, res) => {
   const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(req.params.id);
-  if (!block) return res.status(404).json({ error: 'Block not found' });
+  if (!block) return res.status(404).json({ error: 'Section not found' });
   const id = uuidv4();
-  db.prepare('INSERT INTO blocks (id, page_id, type, data, sort_order, is_visible) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(id, block.page_id, block.type, block.data, block.sort_order + 1, block.is_visible);
+  // An anchor must stay unique, so the copy starts without one.
+  db.prepare('INSERT INTO blocks (id, page_id, type, anchor, data, sort_order, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(id, block.page_id, block.type, '', block.data, block.sort_order + 1, block.is_visible);
   db.prepare('UPDATE blocks SET sort_order = sort_order + 2 WHERE page_id = ? AND sort_order > ? AND id != ?')
     .run(block.page_id, block.sort_order, id);
   res.status(201).json(content.hydrate('blocks', db.prepare('SELECT * FROM blocks WHERE id = ?').get(id)));
@@ -365,47 +284,39 @@ router.get('/enquiries.csv', auth.requireAuth, (req, res) => {
     const row = rows.find(r => r.data && r.data[key]);
     return current[key] || entryLabel(key, row && row.data[key]);
   });
-  const header = ['Received', 'Status', 'Source page', ...keys.map(key => {
-    const row = rows.find(r => r.data && r.data[key]);
-    return entryLabel(key, row && row.data[key]);
-  })];
   const escape = v => `"${String(v == null ? '' : Array.isArray(v) ? v.join('; ') : v).replace(/"/g, '""')}"`;
-  const lines = [header.map(escape).join(',')];
+  const lines = [['Received', 'Status', ...headers].map(escape).join(',')];
   for (const row of rows) {
-    lines.push([row.created_at, row.status, row.source_page, ...keys.map(k => entryValue(row.data[k]))].map(escape).join(','));
+    lines.push([row.created_at, row.status, ...keys.map(k => entryValue(row.data[k]))].map(escape).join(','));
   }
   res.type('text/csv').attachment('enquiries.csv').send(lines.join('\n'));
 });
 
 // --- Media -----------------------------------------------------------------
-const { UPLOAD_DIR } = require('../../paths');
-
-// Uploads are served from the site's own origin, so the extension is derived
-// from an allowlisted MIME type rather than trusted from the filename —
-// otherwise "photo.html" declared as image/png would be served as a live page.
-const ALLOWED_IMAGE_TYPES = {
+// Images for the portrait and social card, plus PDFs for the essay. The
+// extension comes from an allowlisted MIME type rather than the filename, so
+// a mislabelled upload can never be served as an active page.
+const ALLOWED_TYPES = {
   'image/png': '.png',
   'image/jpeg': '.jpg',
   'image/gif': '.gif',
   'image/webp': '.webp',
   'image/avif': '.avif',
+  'application/pdf': '.pdf',
 };
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, UPLOAD_DIR),
     filename: (req, file, cb) => {
-      const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
-      const base = slugify(path.basename(file.originalname, path.extname(file.originalname)), 'image').slice(0, 40);
-      cb(null, `${Date.now()}-${base}${ext}`);
+      const base = slugify(path.basename(file.originalname, path.extname(file.originalname)), 'file').slice(0, 40);
+      cb(null, `${Date.now()}-${base}${ALLOWED_TYPES[file.mimetype]}`);
     },
   }),
-  limits: { fileSize: 8 * 1024 * 1024, files: 1 },
+  limits: { fileSize: 20 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
-    const ok = Object.prototype.hasOwnProperty.call(ALLOWED_IMAGE_TYPES, file.mimetype);
-    // SVG is excluded deliberately: it can carry script and would run on our
-    // own origin. Convert to PNG before uploading.
-    cb(ok ? null : new Error('Only PNG, JPEG, GIF, WebP or AVIF images can be uploaded.'), ok);
+    const ok = Object.prototype.hasOwnProperty.call(ALLOWED_TYPES, file.mimetype);
+    cb(ok ? null : new Error('Upload a PNG, JPEG, GIF, WebP or AVIF image, or a PDF.'), ok);
   },
 });
 
@@ -430,13 +341,9 @@ router.delete('/media/:id', auth.requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// --- Dashboard & account ---------------------------------------------------
+// --- Dashboard, account, session ------------------------------------------
 router.get('/overview', auth.requireAuth, (req, res) => {
-  res.json({
-    counts: content.counts(),
-    recent_enquiries: content.listEnquiries({ limit: 5 }),
-    user: req.user,
-  });
+  res.json({ counts: content.counts(), recent_enquiries: content.listEnquiries({ limit: 5 }), user: req.user });
 });
 
 router.post('/account/password', auth.requireAuth, (req, res) => {
@@ -475,11 +382,8 @@ router.delete('/users/:id', auth.requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// --- Session ---------------------------------------------------------------
 router.post('/login', (req, res) => {
   const { email, password } = req.body || {};
-  // Keyed by address *and* account, so one person's typos cannot lock out a
-  // colleague sharing the office IP.
   const session = auth.login(email, password, `${req.ip || 'unknown'}|${String(email || '').toLowerCase()}`);
   if (session && session.blocked) {
     return res.status(429).json({ error: 'Too many failed attempts. Try again in 15 minutes.' });
@@ -507,11 +411,9 @@ router.get('/me', (req, res) => {
   res.json(user);
 });
 
-// Multer and validation errors should read like the rest of the API.
 router.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
-  const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
-  res.status(status).json({ error: err.message || 'Request failed' });
+  res.status(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ error: err.message || 'Request failed' });
 });
 
 module.exports = router;

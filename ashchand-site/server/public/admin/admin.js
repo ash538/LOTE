@@ -1,10 +1,10 @@
-/* LOTE site admin — a dependency-free SPA over /api/admin. */
+/* ashchand.com.au admin — dependency-free SPA over /api/admin. */
 (function () {
   'use strict';
 
   var app = document.getElementById('app');
   var toastEl = document.getElementById('toast');
-  var state = { user: null, blockTypes: [], media: [], counts: {} };
+  var state = { user: null, blockTypes: [], counts: {} };
 
   // --- Utilities -----------------------------------------------------------
   function api(path, options) {
@@ -17,7 +17,6 @@
       init.body = JSON.stringify(options.body);
     }
     return fetch('/api/admin' + path, init).then(function (res) {
-      if (res.status === 204) return null;
       return res.json().catch(function () { return {}; }).then(function (body) {
         if (!res.ok) throw new Error(body.error || 'Request failed (' + res.status + ')');
         return body;
@@ -38,8 +37,8 @@
     var node = document.createElement(tag);
     Object.keys(attrs || {}).forEach(function (key) {
       if (key === 'class') node.className = attrs[key];
-      else if (key === 'html') node.innerHTML = attrs[key];
       else if (key === 'text') node.textContent = attrs[key];
+      else if (key === 'html') node.innerHTML = attrs[key];
       else if (key.slice(0, 2) === 'on') node.addEventListener(key.slice(2), attrs[key]);
       else if (attrs[key] === true) node.setAttribute(key, '');
       else if (attrs[key] !== false && attrs[key] != null) node.setAttribute(key, attrs[key]);
@@ -53,130 +52,33 @@
 
   function confirmed(message) { return window.confirm(message); }
 
-  // --- Content type definitions (drive the generic editor) ------------------
-  var STATUS = { name: 'status', label: 'Status', type: 'select', options: ['published', 'draft'] };
-
+  // --- Collections ---------------------------------------------------------
   var COLLECTIONS = {
-    services: {
-      label: 'Services', singular: 'service', titleField: 'title', subtitleField: 'summary',
-      description: 'Each service gets its own page at /services/&lt;slug&gt;.',
-      fields: [
-        { name: 'title', label: 'Title', type: 'text', required: true },
-        { name: 'slug', label: 'URL slug', type: 'text', hint: 'Leave blank to generate from the title.' },
-        { name: 'icon', label: 'Icon / emoji', type: 'text' },
-        { name: 'summary', label: 'Summary', type: 'textarea' },
-        { name: 'body', label: 'Body', type: 'richtext' },
-        { name: 'capabilities', label: 'What’s included', type: 'list' },
-        { name: 'image', label: 'Image', type: 'image' },
-        STATUS,
-        { name: 'is_featured', label: 'Featured', type: 'checkbox' },
-        { name: 'seo_description', label: 'Meta description', type: 'textarea' },
-      ],
-    },
-    work: {
-      label: 'Work', singular: 'case study', titleField: 'title', subtitleField: 'client',
-      description: 'Case studies published at /work/&lt;slug&gt;.',
-      fields: [
-        { name: 'title', label: 'Title', type: 'text', required: true },
-        { name: 'slug', label: 'URL slug', type: 'text' },
-        { name: 'client', label: 'Client', type: 'text' },
-        { name: 'sector', label: 'Sector', type: 'text', hint: 'Used for the filter chips on /work.' },
-        { name: 'year', label: 'Year', type: 'text' },
-        { name: 'summary', label: 'Summary', type: 'textarea' },
-        { name: 'challenge', label: 'The challenge', type: 'richtext' },
-        { name: 'approach', label: 'Our approach', type: 'richtext' },
-        { name: 'body', label: 'Additional detail', type: 'richtext' },
-        {
-          name: 'results', label: 'Results', type: 'repeater',
-          fields: [{ name: 'value', label: 'Value', type: 'text' }, { name: 'label', label: 'Label', type: 'text' }],
-        },
-        { name: 'service_tags', label: 'Service tags', type: 'list' },
-        { name: 'thumbnail', label: 'Thumbnail', type: 'image' },
-        { name: 'hero_image', label: 'Hero image', type: 'image' },
-        { name: 'gallery', label: 'Gallery', type: 'imagelist' },
-        STATUS,
-        { name: 'is_featured', label: 'Featured', type: 'checkbox' },
-        { name: 'seo_description', label: 'Meta description', type: 'textarea' },
-      ],
-    },
-    insights: {
-      label: 'Insights', singular: 'article', titleField: 'title', subtitleField: 'category',
-      description: 'Articles and news published at /insights/&lt;slug&gt;.',
-      fields: [
-        { name: 'title', label: 'Title', type: 'text', required: true },
-        { name: 'slug', label: 'URL slug', type: 'text' },
-        { name: 'category', label: 'Category', type: 'text' },
-        { name: 'author', label: 'Author', type: 'text' },
-        { name: 'published_at', label: 'Publish date', type: 'date' },
-        { name: 'excerpt', label: 'Excerpt', type: 'textarea', hint: 'Leave blank to generate from the body.' },
-        { name: 'body', label: 'Body', type: 'richtext', tall: true },
-        { name: 'hero_image', label: 'Hero image', type: 'image' },
-        STATUS,
-        { name: 'is_featured', label: 'Featured', type: 'checkbox' },
-        { name: 'seo_description', label: 'Meta description', type: 'textarea' },
-      ],
-    },
-    team: {
-      label: 'Team', singular: 'team member', titleField: 'name', subtitleField: 'role',
-      fields: [
-        { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'role', label: 'Role', type: 'text' },
-        { name: 'languages', label: 'Languages spoken', type: 'text' },
-        { name: 'bio', label: 'Short bio', type: 'textarea' },
-        { name: 'photo', label: 'Photo', type: 'image' },
-        { name: 'email', label: 'Email', type: 'text' },
-        { name: 'linkedin', label: 'LinkedIn URL', type: 'text' },
-        STATUS,
-      ],
-    },
-    testimonials: {
-      label: 'Testimonials', singular: 'testimonial', titleField: 'person', subtitleField: 'quote',
-      fields: [
-        { name: 'quote', label: 'Quote', type: 'textarea', required: true },
-        { name: 'person', label: 'Person', type: 'text' },
-        { name: 'role', label: 'Role', type: 'text' },
-        { name: 'org', label: 'Organisation', type: 'text' },
-        { name: 'photo', label: 'Photo', type: 'image' },
-        STATUS,
-      ],
-    },
-    clients: {
-      label: 'Clients', singular: 'client', titleField: 'name', subtitleField: 'url',
-      description: 'Logos shown by the “Client logos” section.',
-      fields: [
-        { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'logo', label: 'Logo', type: 'image' },
-        { name: 'url', label: 'Website URL', type: 'text' },
-        STATUS,
-      ],
-    },
     nav: {
-      label: 'Navigation', singular: 'link', titleField: 'label', subtitleField: 'url',
-      description: 'Header and footer menus. Drag to reorder.',
+      label: 'Menus', singular: 'link', titleField: 'label', subtitleField: 'url',
+      description: 'Header and footer links. Drag to reorder. Use <code>/#story</code> style URLs to jump to a section.',
       fields: [
         { name: 'label', label: 'Label', type: 'text', required: true },
-        { name: 'url', label: 'URL', type: 'text', required: true },
+        { name: 'url', label: 'URL', type: 'text', required: true, hint: 'A section anchor like /#story, or a full URL.' },
         { name: 'location', label: 'Menu', type: 'select', options: ['header', 'footer'] },
-        { name: 'is_button', label: 'Show as a button', type: 'checkbox' },
+        { name: 'is_button', label: 'Show as the header button', type: 'checkbox' },
         { name: 'new_tab', label: 'Open in a new tab', type: 'checkbox' },
       ],
     },
     'form-fields': {
       label: 'Form builder', singular: 'field', titleField: 'label', subtitleField: 'type',
-      description: 'Fields on the enquiry form. Drag to reorder.',
+      description: 'The fields on your enquiry form. Drag to reorder.',
       fields: [
         { name: 'label', label: 'Label', type: 'text', required: true },
         {
           name: 'type', label: 'Type', type: 'select',
           options: ['text', 'email', 'tel', 'textarea', 'select', 'checkboxes', 'date', 'number'],
         },
-        { name: 'name', label: 'Field key', type: 'text', hint: 'Generated from the label if left blank.' },
         { name: 'placeholder', label: 'Placeholder', type: 'text' },
         { name: 'help', label: 'Helper text', type: 'text' },
-        { name: 'options', label: 'Options (for select / checkboxes)', type: 'list' },
-        { name: 'width', label: 'Width', type: 'select', options: ['full', 'half'] },
+        { name: 'options', label: 'Options (for dropdown / checkboxes)', type: 'list' },
         { name: 'is_required', label: 'Required', type: 'checkbox' },
-        { name: 'is_active', label: 'Active', type: 'checkbox' },
+        { name: 'is_active', label: 'Show on the site', type: 'checkbox' },
       ],
     },
   };
@@ -214,12 +116,12 @@
     }
 
     if (type === 'textarea' || type === 'richtext') {
-      var area = el('textarea', { class: def.tall || type === 'richtext' ? 'tall' : '' });
+      var area = el('textarea', { class: type === 'richtext' ? 'tall' : '' });
       area.value = value == null ? '' : value;
       area.addEventListener('input', function () { onChange(area.value); });
       return fieldWrap(def, area, type === 'richtext'
         ? el('p', { class: 'hint', text: 'Formatting: ## heading, **bold**, *italic*, - bullet, > quote, [link](/url)' })
-        : null);
+        : el('p', { class: 'hint', text: 'Line breaks are kept in headings.' }));
     }
 
     if (type === 'color') {
@@ -233,12 +135,8 @@
       return fieldWrap(def, el('div', { class: 'color-field' }, [picker, text]));
     }
 
-    if (type === 'image') {
-      return fieldWrap(def, imageControl(value, onChange));
-    }
-
-    if (type === 'imagelist') {
-      return fieldWrap(def, imageListControl(Array.isArray(value) ? value : [], onChange));
+    if (type === 'image' || type === 'file') {
+      return fieldWrap(def, uploadControl(value, onChange, type));
     }
 
     if (type === 'list') {
@@ -251,9 +149,7 @@
       return fieldWrap(def, listArea, el('p', { class: 'hint', text: 'One per line.' }));
     }
 
-    if (type === 'repeater') {
-      return repeaterControl(def, Array.isArray(value) ? value : [], onChange);
-    }
+    if (type === 'repeater') return repeaterControl(def, Array.isArray(value) ? value : [], onChange);
 
     var input = el('input', { type: type === 'date' ? 'date' : type === 'number' ? 'number' : 'text' });
     input.value = value == null ? '' : value;
@@ -261,26 +157,30 @@
     return fieldWrap(def, input);
   }
 
-  function imageControl(value, onChange) {
-    var preview = el('div', { class: 'preview' }, [value ? null : el('span', { text: 'No image' })]);
-    if (value) preview.style.backgroundImage = 'url("' + value + '")';
+  function uploadControl(value, onChange, kind) {
+    var isImage = kind !== 'file';
+    var preview = el('div', { class: 'preview' }, [value ? null : el('span', { text: isImage ? 'No image' : 'No file' })]);
+    if (value && isImage) preview.style.backgroundImage = 'url("' + value + '")';
+    if (value && !isImage) preview.textContent = 'PDF';
 
-    var urlInput = el('input', { type: 'text', placeholder: '/uploads/photo.jpg or https://…' });
+    var urlInput = el('input', { type: 'text', placeholder: isImage ? '/uploads/photo.jpg or https://…' : '/uploads/essay.pdf or https://…' });
     urlInput.value = value || '';
     urlInput.addEventListener('input', function () {
-      preview.style.backgroundImage = urlInput.value ? 'url("' + urlInput.value + '")' : '';
+      if (isImage) preview.style.backgroundImage = urlInput.value ? 'url("' + urlInput.value + '")' : '';
       onChange(urlInput.value);
     });
 
-    var file = el('input', { type: 'file', accept: 'image/*', style: 'display:none' });
+    var file = el('input', { type: 'file', accept: isImage ? 'image/*' : 'application/pdf', style: 'display:none' });
     file.addEventListener('change', function () {
       if (!file.files[0]) return;
-      uploadFile(file.files[0]).then(function (media) {
+      var form = new FormData();
+      form.append('file', file.files[0]);
+      api('/media', { method: 'POST', body: form }).then(function (media) {
         urlInput.value = media.url;
-        preview.style.backgroundImage = 'url("' + media.url + '")';
         preview.textContent = '';
+        if (isImage) preview.style.backgroundImage = 'url("' + media.url + '")'; else preview.textContent = 'PDF';
         onChange(media.url);
-        toast('Image uploaded');
+        toast('Uploaded');
       }).catch(fail);
     });
 
@@ -291,44 +191,24 @@
         el('div', { class: 'list-actions' }, [
           el('button', { class: 'btn btn-sm', type: 'button', text: 'Upload', onclick: function () { file.click(); } }),
           el('button', {
-            class: 'btn btn-sm', type: 'button', text: 'Choose from library',
-            onclick: function () { openMediaPicker(function (url) { urlInput.value = url; preview.style.backgroundImage = 'url("' + url + '")'; preview.textContent = ''; onChange(url); }); },
+            class: 'btn btn-sm', type: 'button', text: 'Choose existing',
+            onclick: function () {
+              openMediaPicker(function (url) {
+                urlInput.value = url;
+                preview.textContent = '';
+                if (isImage) preview.style.backgroundImage = 'url("' + url + '")'; else preview.textContent = 'PDF';
+                onChange(url);
+              });
+            },
           }),
-          value ? el('button', {
+          el('button', {
             class: 'btn btn-sm btn-danger', type: 'button', text: 'Clear',
-            onclick: function () { urlInput.value = ''; preview.style.backgroundImage = ''; onChange(''); },
-          }) : null,
+            onclick: function () { urlInput.value = ''; preview.style.backgroundImage = ''; preview.textContent = ''; onChange(''); },
+          }),
           file,
         ]),
       ]),
     ]);
-  }
-
-  function imageListControl(values, onChange) {
-    var wrap = el('div', {});
-    function paint() {
-      wrap.textContent = '';
-      var grid = el('div', { class: 'image-list' });
-      values.forEach(function (src, index) {
-        var item = el('div', { class: 'image-list-item' }, [
-          el('button', {
-            class: 'btn btn-sm btn-danger', type: 'button', text: '×',
-            onclick: function () { values.splice(index, 1); onChange(values.slice()); paint(); },
-          }),
-        ]);
-        item.style.backgroundImage = 'url("' + src + '")';
-        grid.appendChild(item);
-      });
-      wrap.appendChild(grid);
-      wrap.appendChild(el('button', {
-        class: 'btn btn-sm', type: 'button', text: '+ Add image',
-        onclick: function () {
-          openMediaPicker(function (url) { values.push(url); onChange(values.slice()); paint(); });
-        },
-      }));
-    }
-    paint();
-    return wrap;
   }
 
   function repeaterControl(def, items, onChange) {
@@ -367,16 +247,10 @@
 
     wrap.appendChild(body);
     wrap.appendChild(el('button', {
-      class: 'btn btn-sm', type: 'button', text: '+ Add ' + def.label.toLowerCase().replace(/s$/, ''),
+      class: 'btn btn-sm', type: 'button', text: '+ Add',
       onclick: function () { items.push({}); onChange(items.slice()); paint(); },
     }));
     return wrap;
-  }
-
-  function uploadFile(file) {
-    var form = new FormData();
-    form.append('file', file);
-    return api('/media', { method: 'POST', body: form });
   }
 
   // --- Modal & media picker ------------------------------------------------
@@ -398,21 +272,15 @@
   }
 
   function openMediaPicker(onPick) {
-    openModal('Media library', function (body, close) {
-      var file = el('input', { type: 'file', accept: 'image/*' });
-      file.addEventListener('change', function () {
-        if (!file.files[0]) return;
-        uploadFile(file.files[0]).then(function (media) { onPick(media.url); close(); toast('Image uploaded'); }).catch(fail);
-      });
-      body.appendChild(el('div', { class: 'field' }, [el('label', { text: 'Upload a new image' }), file]));
-
+    openModal('Files', function (body, close) {
       var grid = el('div', { class: 'media-grid' });
       body.appendChild(grid);
       api('/media').then(function (items) {
         if (!items.length) { grid.appendChild(el('p', { class: 'empty', text: 'Nothing uploaded yet.' })); return; }
         items.forEach(function (item) {
           var thumb = el('div', { class: 'thumb' });
-          thumb.style.backgroundImage = 'url("' + item.url + '")';
+          if (/^image\//.test(item.mime)) thumb.style.backgroundImage = 'url("' + item.url + '")';
+          else thumb.appendChild(el('span', { class: 'thumb-label', text: 'PDF' }));
           grid.appendChild(el('div', {
             class: 'media-item', style: 'cursor:pointer',
             onclick: function () { onPick(item.url); close(); },
@@ -424,23 +292,17 @@
 
   // --- Shell ---------------------------------------------------------------
   var NAV = [
-    { group: 'Content', items: [
-      { route: '', label: 'Dashboard' },
-      { route: 'pages', label: 'Pages' },
-      { route: 'collections/work', label: 'Work' },
-      { route: 'collections/services', label: 'Services' },
-      { route: 'collections/insights', label: 'Insights' },
-      { route: 'collections/team', label: 'Team' },
-      { route: 'collections/testimonials', label: 'Testimonials' },
-      { route: 'collections/clients', label: 'Clients' },
-    ] },
     { group: 'Site', items: [
-      { route: 'collections/nav', label: 'Navigation' },
+      { route: '', label: 'Dashboard' },
+      { route: 'pages', label: 'Page & sections' },
+      { route: 'collections/nav', label: 'Menus' },
+    ] },
+    { group: 'Enquiries', items: [
       { route: 'collections/form-fields', label: 'Form builder' },
       { route: 'enquiries', label: 'Enquiries', badge: 'new_enquiries' },
-      { route: 'media', label: 'Media' },
     ] },
     { group: 'Configuration', items: [
+      { route: 'media', label: 'Files' },
       { route: 'settings', label: 'Settings & theme', adminOnly: true },
       { route: 'account', label: 'Account' },
     ] },
@@ -448,14 +310,13 @@
 
   function renderShell(main) {
     var current = location.hash.replace(/^#\/?/, '');
+    var isAdmin = state.user && state.user.role === 'admin';
     var sidebar = el('aside', { class: 'sidebar' }, [
       el('a', { class: 'sidebar-brand', href: '#/' }, [
-        'Site admin',
+        'ashchand.com.au',
         el('small', { text: state.user ? state.user.email : '' }),
       ]),
     ]);
-
-    var isAdmin = state.user && state.user.role === 'admin';
 
     NAV.forEach(function (group) {
       var items = group.items.filter(function (item) { return isAdmin || !item.adminOnly; });
@@ -463,12 +324,10 @@
       var box = el('div', { class: 'side-group' }, [el('h4', { text: group.group })]);
       items.forEach(function (item) {
         var active = current === item.route || (item.route && current.indexOf(item.route) === 0);
-        var badgeValue = item.badge ? state.counts[item.badge] : 0;
-        box.appendChild(el('a', {
-          class: 'side-link' + (active ? ' is-active' : ''), href: '#/' + item.route,
-        }, [
+        var badge = item.badge ? state.counts[item.badge] : 0;
+        box.appendChild(el('a', { class: 'side-link' + (active ? ' is-active' : ''), href: '#/' + item.route }, [
           el('span', { text: item.label }),
-          badgeValue ? el('span', { class: 'side-badge', text: String(badgeValue) }) : null,
+          badge ? el('span', { class: 'side-badge', text: String(badge) }) : null,
         ]));
       });
       sidebar.appendChild(box);
@@ -498,7 +357,6 @@
     return el('span', { class: 'pill ' + String(value || '').toLowerCase(), text: value || '' });
   }
 
-  // --- Drag-to-reorder helper ---------------------------------------------
   function makeSortable(container, onDrop) {
     var dragging = null;
     container.addEventListener('dragstart', function (e) {
@@ -520,14 +378,12 @@
       container.querySelectorAll('.drag-over').forEach(function (n) { n.classList.remove('drag-over'); });
       row.classList.add('drag-over');
       var rect = row.getBoundingClientRect();
-      var after = (e.clientY - rect.top) / rect.height > 0.5;
-      container.insertBefore(dragging, after ? row.nextSibling : row);
+      container.insertBefore(dragging, (e.clientY - rect.top) / rect.height > 0.5 ? row.nextSibling : row);
     });
     container.addEventListener('drop', function (e) {
       e.preventDefault();
       container.querySelectorAll('.drag-over').forEach(function (n) { n.classList.remove('drag-over'); });
-      var ids = Array.prototype.map.call(container.querySelectorAll('[data-id]'), function (n) { return n.getAttribute('data-id'); });
-      onDrop(ids);
+      onDrop(Array.prototype.map.call(container.querySelectorAll('[data-id]'), function (n) { return n.getAttribute('data-id'); }));
     });
   }
 
@@ -553,8 +409,8 @@
 
     app.appendChild(el('div', { class: 'login-wrap' }, [
       el('div', { class: 'login-card' }, [
-        el('h1', { text: 'Site admin' }),
-        el('p', { class: 'sub', text: 'Sign in to edit the website.' }),
+        el('h1', { text: 'ashchand.com.au' }),
+        el('p', { class: 'sub', text: 'Sign in to edit your site.' }),
         form,
       ]),
     ]));
@@ -565,21 +421,23 @@
     api('/overview').then(function (data) {
       state.counts = data.counts;
       var stats = el('div', { class: 'stat-grid' }, [
-        ['Pages', data.counts.pages], ['Case studies', data.counts.work], ['Services', data.counts.services],
-        ['Insights', data.counts.insights], ['Team', data.counts.team], ['New enquiries', data.counts.new_enquiries],
+        ['Sections', data.counts.sections], ['Form fields', data.counts.form_fields],
+        ['New enquiries', data.counts.new_enquiries], ['Enquiries', data.counts.enquiries],
+        ['Files', data.counts.media],
       ].map(function (pair) {
         return el('div', { class: 'stat-card' }, [el('b', { text: String(pair[1]) }), el('span', { text: pair[0] })]);
       }));
 
-      var recent = el('div', { class: 'list' });
+      var recent;
       if (!data.recent_enquiries.length) {
         recent = el('p', { class: 'empty', text: 'No enquiries yet.' });
       } else {
+        recent = el('div', { class: 'list' });
         data.recent_enquiries.forEach(function (item) {
           recent.appendChild(el('div', { class: 'list-row' }, [
             el('div', { class: 'list-main' }, [
               el('strong', { text: item.name || item.email || 'Enquiry' }),
-              el('span', { text: item.created_at + ' · ' + (item.source_page || '') }),
+              el('span', { text: item.created_at }),
             ]),
             statusPill(item.status),
             el('a', { class: 'btn btn-sm', href: '#/enquiries', text: 'Open' }),
@@ -588,9 +446,9 @@
       }
 
       renderShell(el('div', {}, [
-        headRow('Dashboard', 'Everything on the public site is editable here.', [
+        headRow('Dashboard', 'Everything on the site is editable here.', [
           el('a', { class: 'btn', href: '/', target: '_blank', text: 'View site ↗' }),
-          el('a', { class: 'btn btn-primary', href: '#/pages', text: 'Edit pages' }),
+          el('a', { class: 'btn btn-primary', href: '#/pages', text: 'Edit the page' }),
         ]),
         stats,
         el('h2', { text: 'Recent enquiries' }),
@@ -603,13 +461,11 @@
     api('/pages').then(function (pages) {
       var list = el('div', { class: 'list' });
       pages.forEach(function (page) {
-        list.appendChild(el('div', { class: 'list-row', 'data-id': page.id, draggable: 'true' }, [
-          el('span', { class: 'drag-handle', text: '⠿' }),
+        list.appendChild(el('div', { class: 'list-row' }, [
           el('div', { class: 'list-main' }, [
             el('strong', { text: page.title }),
             el('span', { text: '/' + (page.slug === 'home' ? '' : page.slug) }),
           ]),
-          page.show_in_nav ? el('span', { class: 'pill', text: 'In menu' }) : null,
           statusPill(page.status),
           el('div', { class: 'list-actions' }, [
             el('a', { class: 'btn btn-sm', href: '/' + (page.slug === 'home' ? '' : page.slug) + '?preview=1', target: '_blank', text: 'Preview' }),
@@ -617,22 +473,17 @@
           ]),
         ]));
       });
-      makeSortable(list, function (ids) {
-        Promise.all(ids.map(function (id, index) {
-          return api('/pages/' + id, { method: 'PUT', body: { sort_order: index } });
-        })).then(function () { toast('Order saved'); }).catch(fail);
-      });
 
       renderShell(el('div', {}, [
-        headRow('Pages', 'Each page is built from sections you can add, reorder and edit.', [
-          el('button', { class: 'btn btn-primary', text: '+ New page', onclick: function () {
+        headRow('Page & sections', 'Your site is one page made of sections you can edit, reorder and hide.', [
+          el('button', { class: 'btn', text: '+ New page', onclick: function () {
             var title = window.prompt('Page title');
             if (!title) return;
             api('/pages', { method: 'POST', body: { title: title, status: 'draft' } })
               .then(function (page) { location.hash = '#/pages/' + page.id; }).catch(fail);
           } }),
         ]),
-        pages.length ? list : el('p', { class: 'empty', text: 'No pages yet.' }),
+        list,
       ]));
     }).catch(handleAuthError);
   }
@@ -644,98 +495,78 @@
       var byType = {};
       state.blockTypes.forEach(function (b) { byType[b.type] = b; });
 
-      var meta = el('div', { class: 'card' }, []);
+      function reload() { viewPageEditor(id); }
+
       var draft = {
         title: page.title, slug: page.slug, status: page.status,
-        show_in_nav: page.show_in_nav, nav_label: page.nav_label,
         seo_title: page.seo_title, seo_description: page.seo_description, og_image: page.og_image,
       };
-
+      var meta = el('div', { class: 'card' }, []);
       [
         { name: 'title', label: 'Page title', type: 'text' },
-        { name: 'slug', label: 'URL slug', type: 'text', hint: page.is_locked ? 'This page is part of the site structure — its URL is fixed.' : 'Page URL: /' + page.slug },
         { name: 'status', label: 'Status', type: 'select', options: ['published', 'draft'] },
-        { name: 'show_in_nav', label: 'Show in the header menu', type: 'checkbox' },
-        { name: 'seo_title', label: 'SEO title', type: 'text' },
+        { name: 'seo_title', label: 'Browser tab / search title', type: 'text' },
         { name: 'seo_description', label: 'Meta description', type: 'textarea' },
         { name: 'og_image', label: 'Social share image', type: 'image' },
       ].forEach(function (def) {
-        if (def.name === 'slug' && page.is_locked) return;
         meta.appendChild(renderField(def, draft[def.name], function (value) { draft[def.name] = value; }));
       });
 
       var blockList = el('div', {});
+      page.blocks.forEach(function (block) {
+        var def = byType[block.type] || { label: block.type, fields: [] };
+        var data = Object.assign({}, def.defaults || {}, block.data || {});
+        var anchor = block.anchor || '';
+        var body = el('div', { class: 'block-body', style: 'display:none' });
+        var expanded = false;
 
-      function paintBlocks(blocks) {
-        blockList.textContent = '';
-        blocks.forEach(function (block) {
-          var def = byType[block.type] || { label: block.type, fields: [] };
-          var data = Object.assign({}, def.defaults || {}, block.data || {});
-          var body = el('div', { class: 'block-body', style: 'display:none' });
-          var expanded = false;
+        var head = el('div', { class: 'block-head', onclick: function (e) {
+          if (e.target.closest('button')) return;
+          expanded = !expanded;
+          body.style.display = expanded ? 'block' : 'none';
+        } }, [
+          el('span', { class: 'drag-handle', text: '⠿' }),
+          el('div', {}, [
+            el('strong', { text: def.label }),
+            el('div', { class: 'block-type', text: (block.anchor ? '#' + block.anchor + ' · ' : '') + (data.heading || def.description || block.type).slice(0, 80) }),
+          ]),
+          el('div', { class: 'list-actions' }, [
+            el('button', { class: 'btn btn-sm', text: block.is_visible ? 'Hide' : 'Show', onclick: function () {
+              api('/blocks/' + block.id, { method: 'PUT', body: { is_visible: block.is_visible ? 0 : 1 } }).then(reload).catch(fail);
+            } }),
+            el('button', { class: 'btn btn-sm', text: 'Duplicate', onclick: function () {
+              api('/blocks/' + block.id + '/duplicate', { method: 'POST' }).then(reload).catch(fail);
+            } }),
+            el('button', { class: 'btn btn-sm btn-danger', text: 'Delete', onclick: function () {
+              if (!confirmed('Delete this ' + def.label + ' section?')) return;
+              api('/blocks/' + block.id, { method: 'DELETE' }).then(reload).catch(fail);
+            } }),
+          ]),
+        ]);
 
-          var head = el('div', { class: 'block-head', onclick: function (e) {
-            if (e.target.closest('button') || e.target.closest('a')) return;
-            expanded = !expanded;
-            body.style.display = expanded ? 'block' : 'none';
-          } }, [
-            el('span', { class: 'drag-handle', text: '⠿' }),
-            el('div', {}, [
-              el('strong', { text: def.label }),
-              el('div', { class: 'block-type', text: data.heading || data.eyebrow || def.description || block.type }),
-            ]),
-            el('div', { class: 'list-actions' }, [
-              el('button', { class: 'btn btn-sm', text: block.is_visible ? 'Hide' : 'Show', onclick: function () {
-                api('/blocks/' + block.id, { method: 'PUT', body: { is_visible: block.is_visible ? 0 : 1 } })
-                  .then(reload).catch(fail);
-              } }),
-              el('button', { class: 'btn btn-sm', text: 'Duplicate', onclick: function () {
-                api('/blocks/' + block.id + '/duplicate', { method: 'POST' }).then(reload).catch(fail);
-              } }),
-              el('button', { class: 'btn btn-sm btn-danger', text: 'Delete', onclick: function () {
-                if (!confirmed('Delete this ' + def.label + ' section?')) return;
-                api('/blocks/' + block.id, { method: 'DELETE' }).then(reload).catch(fail);
-              } }),
-            ]),
-          ]);
-
-          (def.fields || []).forEach(function (fieldDef) {
-            body.appendChild(renderField(fieldDef, data[fieldDef.name], function (value) { data[fieldDef.name] = value; }));
-          });
-          body.appendChild(el('button', {
-            class: 'btn btn-primary btn-sm', text: 'Save section', onclick: function () {
-              api('/blocks/' + block.id, { method: 'PUT', body: { data: data } })
-                .then(function () { toast('Section saved'); reload(); }).catch(fail);
-            },
-          }));
-
-          blockList.appendChild(el('div', {
-            class: 'block-item' + (block.is_visible ? '' : ' is-hidden'), 'data-id': block.id, draggable: 'true',
-          }, [head, body]));
+        body.appendChild(renderField(
+          { name: 'anchor', label: 'Section link name', type: 'text', hint: 'Lets the menu jump here, e.g. "story" makes /#story work.' },
+          anchor, function (value) { anchor = value; }
+        ));
+        (def.fields || []).forEach(function (fieldDef) {
+          body.appendChild(renderField(fieldDef, data[fieldDef.name], function (value) { data[fieldDef.name] = value; }));
         });
+        body.appendChild(el('button', {
+          class: 'btn btn-primary btn-sm', text: 'Save section', onclick: function () {
+            api('/blocks/' + block.id, { method: 'PUT', body: { data: data, anchor: anchor } })
+              .then(function () { toast('Section saved'); reload(); }).catch(fail);
+          },
+        }));
 
-        makeSortable(blockList, function (ids) {
-          api('/pages/' + page.id + '/blocks/reorder', { method: 'POST', body: { ids: ids } })
-            .then(function () { toast('Sections reordered'); }).catch(fail);
-        });
-      }
+        blockList.appendChild(el('div', {
+          class: 'block-item' + (block.is_visible ? '' : ' is-hidden'), 'data-id': block.id, draggable: 'true',
+        }, [head, body]));
+      });
 
-      function reload() { viewPageEditor(id); }
-
-      paintBlocks(page.blocks);
-
-      var addBlock = el('button', { class: 'btn btn-primary', text: '+ Add section', onclick: function () {
-        openModal('Add a section', function (body, close) {
-          var picker = el('div', { class: 'block-picker' });
-          state.blockTypes.forEach(function (def) {
-            picker.appendChild(el('button', { class: 'block-option', type: 'button', onclick: function () {
-              api('/pages/' + page.id + '/blocks', { method: 'POST', body: { type: def.type } })
-                .then(function () { close(); reload(); toast(def.label + ' added'); }).catch(fail);
-            } }, [el('strong', { text: def.label }), el('span', { text: def.description || '' })]));
-          });
-          body.appendChild(picker);
-        });
-      } });
+      makeSortable(blockList, function (ids) {
+        api('/pages/' + page.id + '/blocks/reorder', { method: 'POST', body: { ids: ids } })
+          .then(function () { toast('Sections reordered'); }).catch(fail);
+      });
 
       renderShell(el('div', {}, [
         headRow(page.title, 'Page settings and sections.', [
@@ -749,12 +580,24 @@
         el('h2', { text: 'Page settings' }),
         meta,
         el('button', { class: 'btn btn-primary', text: 'Save page settings', onclick: function () {
-          api('/pages/' + page.id, { method: 'PUT', body: draft })
-            .then(function () { toast('Page saved'); reload(); }).catch(fail);
+          api('/pages/' + page.id, { method: 'PUT', body: draft }).then(function () { toast('Page saved'); reload(); }).catch(fail);
         } }),
         el('h2', { style: 'margin-top:30px', text: 'Sections' }),
-        page.blocks.length ? blockList : el('p', { class: 'empty', text: 'No sections yet — add the first one below.' }),
-        el('div', { style: 'margin-top:14px' }, [addBlock]),
+        page.blocks.length ? blockList : el('p', { class: 'empty', text: 'No sections yet.' }),
+        el('div', { style: 'margin-top:14px' }, [
+          el('button', { class: 'btn btn-primary', text: '+ Add section', onclick: function () {
+            openModal('Add a section', function (body, close) {
+              var picker = el('div', { class: 'block-picker' });
+              state.blockTypes.forEach(function (def) {
+                picker.appendChild(el('button', { class: 'block-option', type: 'button', onclick: function () {
+                  api('/pages/' + page.id + '/blocks', { method: 'POST', body: { type: def.type } })
+                    .then(function () { close(); reload(); toast(def.label + ' added'); }).catch(fail);
+                } }, [el('strong', { text: def.label }), el('span', { text: def.description || '' })]));
+              });
+              body.appendChild(picker);
+            });
+          } }),
+        ]),
       ]));
     }).catch(handleAuthError);
   }
@@ -770,15 +613,13 @@
           el('span', { class: 'drag-handle', text: '⠿' }),
           el('div', { class: 'list-main' }, [
             el('strong', { text: item[def.titleField] || '(untitled)' }),
-            el('span', { text: String(item[def.subtitleField] || '').slice(0, 110) }),
+            el('span', { text: String(item[def.subtitleField] || '') }),
           ]),
-          item.is_featured ? el('span', { class: 'pill featured', text: 'Featured' }) : null,
-          item.status ? statusPill(item.status) : null,
+          item.location ? el('span', { class: 'pill', text: item.location }) : null,
+          item.is_button ? el('span', { class: 'pill featured', text: 'Button' }) : null,
+          key === 'form-fields' ? statusPill(item.is_active ? 'published' : 'hidden') : null,
+          key === 'form-fields' && item.is_required ? el('span', { class: 'pill', text: 'Required' }) : null,
           el('div', { class: 'list-actions' }, [
-            item.slug ? el('a', {
-              class: 'btn btn-sm', target: '_blank', text: 'View',
-              href: '/' + (key === 'work' ? 'work' : key === 'services' ? 'services' : 'insights') + '/' + item.slug + '?preview=1',
-            }) : null,
             el('button', { class: 'btn btn-sm btn-primary', text: 'Edit', onclick: function () { openEntryEditor(key, item); } }),
             el('button', { class: 'btn btn-sm btn-danger', text: 'Delete', onclick: function () {
               if (!confirmed('Delete this ' + def.singular + '?')) return;
@@ -798,7 +639,7 @@
         headRow(def.label, def.description || '', [
           el('button', { class: 'btn btn-primary', text: '+ New ' + def.singular, onclick: function () { openEntryEditor(key, null); } }),
         ]),
-        items.length ? list : el('p', { class: 'empty', text: 'Nothing here yet — add the first ' + def.singular + '.' }),
+        items.length ? list : el('p', { class: 'empty', text: 'Nothing here yet.' }),
       ]));
     }).catch(handleAuthError);
   }
@@ -810,7 +651,7 @@
       var value = item ? item[field.name] : undefined;
       if (value === undefined) {
         value = field.type === 'checkbox' ? (field.name === 'is_active' ? 1 : 0)
-          : field.type === 'list' || field.type === 'imagelist' || field.type === 'repeater' ? []
+          : field.type === 'list' ? []
             : field.type === 'select' ? (field.options || [])[0] : '';
       }
       draft[field.name] = value;
@@ -847,7 +688,7 @@
         });
         detail.appendChild(dl);
 
-        var notes = el('textarea', { placeholder: 'Internal notes' });
+        var notes = el('textarea', { placeholder: 'Private notes' });
         notes.value = item.notes || '';
         var statusSelect = el('select', {});
         ['new', 'actioned', 'archived'].forEach(function (s) {
@@ -863,7 +704,7 @@
         detail.appendChild(el('div', { class: 'list-actions' }, [
           el('button', { class: 'btn btn-sm btn-primary', text: 'Save', onclick: function () {
             api('/enquiries/' + item.id, { method: 'PUT', body: { status: statusSelect.value, notes: notes.value } })
-              .then(function () { toast('Enquiry updated'); viewEnquiries(); }).catch(fail);
+              .then(function () { toast('Updated'); viewEnquiries(); }).catch(fail);
           } }),
           item.email ? el('a', { class: 'btn btn-sm', href: 'mailto:' + item.email, text: 'Reply by email' }) : null,
           el('button', { class: 'btn btn-sm btn-danger', text: 'Delete', onclick: function () {
@@ -878,7 +719,7 @@
           } }, [
             el('div', { class: 'list-main' }, [
               el('strong', { text: item.name || item.email || 'Enquiry' }),
-              el('span', { text: item.created_at + (item.source_page ? ' · ' + item.source_page : '') }),
+              el('span', { text: item.created_at }),
             ]),
             statusPill(item.status),
           ]),
@@ -887,7 +728,7 @@
       });
 
       renderShell(el('div', {}, [
-        headRow('Enquiries', 'Everything submitted through the website form.', [
+        headRow('Enquiries', 'Everything sent through the form on your site.', [
           el('a', { class: 'btn', href: '/api/admin/enquiries.csv', text: 'Export CSV' }),
           el('a', { class: 'btn', href: '#/collections/form-fields', text: 'Edit form fields' }),
         ]),
@@ -898,22 +739,27 @@
 
   function viewMedia() {
     api('/media').then(function (items) {
-      var file = el('input', { type: 'file', accept: 'image/*', multiple: true });
+      var file = el('input', { type: 'file', accept: 'image/*,application/pdf', multiple: true });
       file.addEventListener('change', function () {
-        var uploads = Array.prototype.map.call(file.files, uploadFile);
+        var uploads = Array.prototype.map.call(file.files, function (f) {
+          var form = new FormData();
+          form.append('file', f);
+          return api('/media', { method: 'POST', body: form });
+        });
         Promise.all(uploads).then(function () { toast('Uploaded'); viewMedia(); }).catch(fail);
       });
 
       var grid = el('div', { class: 'media-grid' });
       items.forEach(function (item) {
         var thumb = el('div', { class: 'thumb' });
-        thumb.style.backgroundImage = 'url("' + item.url + '")';
+        if (/^image\//.test(item.mime)) thumb.style.backgroundImage = 'url("' + item.url + '")';
+        else thumb.appendChild(el('span', { class: 'thumb-label', text: 'PDF' }));
         grid.appendChild(el('div', { class: 'media-item' }, [
-          thumb,
+          el('a', { href: item.url, target: '_blank' }, [thumb]),
           el('div', { class: 'meta' }, [
             el('span', { text: item.original_name || item.filename }),
             el('button', { class: 'btn btn-sm btn-danger', text: '×', onclick: function () {
-              if (!confirmed('Delete this image? Anything using it will show a broken image.')) return;
+              if (!confirmed('Delete this file? Anything using it will break.')) return;
               api('/media/' + item.id, { method: 'DELETE' }).then(function () { viewMedia(); }).catch(fail);
             } }),
           ]),
@@ -921,9 +767,9 @@
       });
 
       renderShell(el('div', {}, [
-        headRow('Media', 'Images available to every page and collection.', []),
-        el('div', { class: 'card' }, [el('div', { class: 'field' }, [el('label', { text: 'Upload images' }), file])]),
-        items.length ? grid : el('p', { class: 'empty', text: 'No images yet.' }),
+        headRow('Files', 'Your portrait, the essay PDF and anything else the site links to.', []),
+        el('div', { class: 'card' }, [el('div', { class: 'field' }, [el('label', { text: 'Upload images or PDFs' }), file])]),
+        items.length ? grid : el('p', { class: 'empty', text: 'Nothing uploaded yet.' }),
       ]));
     }).catch(handleAuthError);
   }
@@ -945,14 +791,12 @@
             onclick: function () { activeGroup = group.key; paint(); },
           }));
         });
-
         panel.textContent = '';
         var card = el('div', { class: 'card' });
         schema.fields.filter(function (f) { return f.group === activeGroup; }).forEach(function (field) {
           card.appendChild(renderField(
-            { name: field.key, label: field.label, type: field.type, options: field.options, tall: field.key === 'custom_css' },
-            draft[field.key],
-            function (value) { draft[field.key] = value; }
+            { name: field.key, label: field.label, type: field.type, options: field.options },
+            draft[field.key], function (value) { draft[field.key] = value; }
           ));
         });
         panel.appendChild(card);
@@ -960,7 +804,7 @@
       paint();
 
       renderShell(el('div', {}, [
-        headRow('Settings & theme', 'Brand, colours, typography, contact details and SEO. Changes apply to the live site immediately.', [
+        headRow('Settings & theme', 'Your name, colours, type, footer, form and SEO. Changes apply to the live site.', [
           el('a', { class: 'btn', href: '/', target: '_blank', text: 'View site ↗' }),
         ]),
         tabs,
@@ -969,7 +813,7 @@
           el('button', { class: 'btn btn-primary', text: 'Save settings', onclick: function () {
             api('/settings', { method: 'PUT', body: draft }).then(function () { toast('Settings saved'); }).catch(fail);
           } }),
-          el('span', { class: 'status', text: 'Theme changes take effect on the next page load.' }),
+          el('span', { class: 'status', text: 'Theme changes show on the next page load.' }),
         ]),
       ]));
     }).catch(handleAuthError);
@@ -977,10 +821,7 @@
 
   function viewAccount() {
     var isAdmin = state.user.role === 'admin';
-    // Editors can change their own password but not manage other accounts.
-    var loadUsers = isAdmin ? api('/users') : Promise.resolve([]);
-
-    loadUsers.then(function (users) {
+    (isAdmin ? api('/users') : Promise.resolve([])).then(function (users) {
       var newPassword = el('input', { type: 'password', autocomplete: 'new-password' });
       var list = el('div', { class: 'list' });
       users.forEach(function (user) {
@@ -997,11 +838,11 @@
       });
 
       var invite = { email: '', name: '', password: '', role: 'editor' };
-      var inviteCard = el('div', { class: 'card' }, [el('h3', { text: 'Add a team member' })]);
+      var inviteCard = el('div', { class: 'card' }, [el('h3', { text: 'Give someone else access' })]);
       [
         { name: 'name', label: 'Name', type: 'text' },
         { name: 'email', label: 'Email', type: 'text' },
-        { name: 'password', label: 'Temporary password', type: 'text', hint: 'At least 8 characters. They can change it after signing in.' },
+        { name: 'password', label: 'Temporary password', type: 'text', hint: 'At least 8 characters.' },
         { name: 'role', label: 'Role', type: 'select', options: ['editor', 'admin'] },
       ].forEach(function (field) {
         inviteCard.appendChild(renderField(field, invite[field.name], function (value) { invite[field.name] = value; }));
@@ -1011,8 +852,7 @@
       } }));
 
       renderShell(el('div', {}, [
-        headRow(isAdmin ? 'Account & users' : 'Your account',
-          isAdmin ? 'Who can sign in and edit the site.' : 'Your sign-in details.', []),
+        headRow(isAdmin ? 'Account & access' : 'Your account', 'Sign-in details.', []),
         el('div', { class: 'card' }, [
           el('h3', { text: 'Change your password' }),
           el('div', { class: 'field' }, [el('label', { text: 'New password' }), newPassword]),
@@ -1046,7 +886,7 @@
     if (path === 'enquiries') return viewEnquiries();
     if (path === 'media') return viewMedia();
     if (path === 'settings') {
-      if (state.user.role !== 'admin') { toast('Only an admin can change site settings.', true); return viewDashboard(); }
+      if (state.user.role !== 'admin') { toast('Only an admin can change settings.', true); return viewDashboard(); }
       return viewSettings();
     }
     if (path === 'account') return viewAccount();

@@ -1,0 +1,13 @@
+<section class="quote-section" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="quote-grid">
+    <div>
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+    </div>
+    <div class="quote">
+      <span class="quote-mark" aria-hidden="true">“</span>
+      <blockquote><%= data.quote %></blockquote>
+      <% if (data.note) { %><p><%= data.note %></p><% } %>
+    </div>
+  </div>
+</section>

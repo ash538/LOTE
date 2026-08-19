@@ -1,0 +1,57 @@
+<section class="section contact shell" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="contact-grid">
+    <div>
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+      <% if (data.intro) { %><p class="copy contact-intro"><%= data.intro %></p><% } %>
+      <% if (settings.domain_label) { %><p class="eyebrow contact-domain"><%= settings.domain_label %></p><% } %>
+    </div>
+
+    <div>
+      <form class="contact-form" data-enquiry-form novalidate>
+        <div class="form-kicker eyebrow">
+          <span class="on-butter"><%= data.form_kicker || 'Enquiry' %></span>
+          <span><%= settings.domain_label %></span>
+        </div>
+
+        <div class="form-fields">
+          <% (source.fields || []).forEach(field => { %>
+            <div class="field field-<%= field.width || 'full' %>">
+              <label for="f-<%= field.name %>"><%= field.label %><%= field.is_required ? ' *' : '' %></label>
+              <% if (field.type === 'textarea') { %>
+                <textarea id="f-<%= field.name %>" name="<%= field.name %>" placeholder="<%= field.placeholder %>" <%= field.is_required ? 'required' : '' %>></textarea>
+              <% } else if (field.type === 'select') { %>
+                <select id="f-<%= field.name %>" name="<%= field.name %>" <%= field.is_required ? 'required' : '' %>>
+                  <option value="">Please choose…</option>
+                  <% (field.options || []).forEach(opt => { %><option value="<%= opt %>"><%= opt %></option><% }) %>
+                </select>
+              <% } else if (field.type === 'checkboxes') { %>
+                <div class="checkbox-row">
+                  <% (field.options || []).forEach(opt => { %>
+                    <label class="checkbox"><input type="checkbox" name="<%= field.name %>" value="<%= opt %>" /> <span><%= opt %></span></label>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <input id="f-<%= field.name %>" name="<%= field.name %>" type="<%= field.type || 'text' %>" placeholder="<%= field.placeholder %>" <%= field.is_required ? 'required' : '' %> />
+              <% } %>
+              <% if (field.help) { %><p class="field-help"><%= field.help %></p><% } %>
+            </div>
+          <% }) %>
+        </div>
+
+        <input type="text" name="company_website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button class="button form-button" type="submit"><%= settings.form_submit_label || 'Send it through ↗' %></button>
+        <% if (settings.form_note) { %><p class="form-note"><%= settings.form_note %></p><% } %>
+        <p class="form-status" data-form-status role="status"></p>
+      </form>
+
+      <div class="form-success" data-form-success>
+        <div>
+          <span class="eyebrow on-butter">Received</span>
+          <h3><%= settings.form_success_heading %></h3>
+        </div>
+        <p><%= settings.form_success_message %></p>
+      </div>
+    </div>
+  </div>
+</section>

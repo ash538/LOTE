@@ -1,0 +1,6 @@
+<section class="values shell" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <% if (data.statement) { %><p><%= data.statement %></p><% } %>
+  <% (data.items || []).forEach(item => { %>
+    <div class="value"><strong><%= item.value %></strong><span><%= item.label %></span></div>
+  <% }) %>
+</section>

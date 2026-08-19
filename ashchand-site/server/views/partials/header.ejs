@@ -1,0 +1,30 @@
+<% if (preview) { %>
+<div class="preview-bar">Preview — drafts and hidden sections are visible. <a href="<%= currentPath %>">Exit preview</a> <a href="/admin">Back to admin</a></div>
+<% } %>
+<a class="skip-link" href="#top">Skip to content</a>
+<% if (settings.show_progress_bar === '1') { %>
+<div class="progress" aria-hidden="true"><i id="progress"></i></div>
+<% } %>
+<header>
+  <div class="nav shell">
+    <a class="brand" href="/#top" aria-label="<%= settings.site_name %> home">
+      <span class="brand-mark"><%= settings.brand_mark %></span><span><%= settings.brand_wordmark %></span>
+    </a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <% nav.filter(item => !item.is_button).forEach(item => { %>
+        <a href="<%= item.url %>" <% if (item.new_tab) { %>target="_blank" rel="noreferrer"<% } %>><%= item.label %></a>
+      <% }) %>
+    </nav>
+    <% const navButton = nav.find(item => item.is_button); %>
+    <% if (navButton) { %>
+      <a class="button" href="<%= navButton.url %>" <% if (navButton.new_tab) { %>target="_blank" rel="noreferrer"<% } %>><%= navButton.label %> <span aria-hidden="true">↗</span></a>
+    <% } %>
+    <button class="menu" id="menu" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+    <% nav.filter(item => !item.is_button).forEach(item => { %>
+      <a href="<%= item.url %>" <% if (item.new_tab) { %>target="_blank" rel="noreferrer"<% } %>><%= item.label %></a>
+    <% }) %>
+    <% if (navButton) { %><a class="button" href="<%= navButton.url %>"><%= navButton.label %> ↗</a><% } %>
+  </nav>
+</header>

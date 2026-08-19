@@ -1,0 +1,14 @@
+<footer>
+  <div class="shell footer-inner">
+    <a class="brand" href="#top"><span class="brand-mark"><%= settings.brand_mark %></span><span><%= settings.brand_wordmark %></span></a>
+    <div class="footer-meta">
+      <% footerNav.forEach(item => { %>
+        <a href="<%= item.url %>" <% if (item.new_tab) { %>target="_blank" rel="noreferrer"<% } %>><%= item.label %></a>
+      <% }) %>
+      <% if (settings.domain_label) { %><span><%= settings.domain_label %></span><% } %>
+      <% if (settings.footer_legal) { %><span><%= settings.footer_legal %></span><% } %>
+      <a href="#top" class="footer-top">Back to top</a>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>

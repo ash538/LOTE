@@ -19,12 +19,12 @@ function verifyPassword(password, stored) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-// Creates the first admin from env vars (or safe defaults) on boot.
+// Creates the first sign-in from env vars (or safe defaults) on boot.
 function ensureAdmin() {
   const count = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
   if (count > 0) return null;
 
-  const email = process.env.ADMIN_EMAIL || 'admin@lotemarketing.com.au';
+  const email = process.env.ADMIN_EMAIL || 'ash@ashchand.com.au';
   // An unset ADMIN_PASSWORD always gets a random one, printed once to the log.
   // A known default would otherwise ship to anywhere NODE_ENV is not set.
   const generated = !process.env.ADMIN_PASSWORD;
@@ -36,7 +36,7 @@ function ensureAdmin() {
   `).run(id, email.toLowerCase(), 'Site admin', hashPassword(password));
 
   if (generated) {
-    console.log(`[cms] Created admin ${email} with the password "${password}" — change it under Account & users.`);
+    console.log(`[site] Created sign-in ${email} with the password "${password}" — change it under Account.`);
   }
   return { id, email };
 }

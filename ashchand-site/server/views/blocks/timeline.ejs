@@ -1,0 +1,21 @@
+<section class="section shell" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="section-grid">
+    <div class="section-title">
+      <% if (data.eyebrow) { %><span class="eyebrow accent"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+      <% if (data.intro) { %><p class="copy"><%= data.intro %></p><% } %>
+    </div>
+    <div class="timeline">
+      <% (data.items || []).forEach(item => { %>
+        <article class="role">
+          <time><%= item.period %></time>
+          <div>
+            <h3><%= item.title %></h3>
+            <% if (item.org) { %><h4><%= item.org %></h4><% } %>
+            <% if (item.text) { %><p><%= item.text %></p><% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>

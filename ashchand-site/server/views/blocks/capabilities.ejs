@@ -1,0 +1,21 @@
+<section class="section dark" <% if (block.anchor) { %>id="<%= block.anchor %>"<% } %> data-reveal>
+  <div class="shell section-grid">
+    <div class="section-title">
+      <% if (data.eyebrow) { %><span class="eyebrow"><%= data.eyebrow %></span><% } %>
+      <h2 class="display"><%- h.escapeHtml(data.heading).replace(/\n/g, '<br />') %></h2>
+      <% if (data.intro) { %><p><%= data.intro %></p><% } %>
+    </div>
+    <div class="capabilities">
+      <% (data.items || []).forEach((item, i) => { %>
+        <article class="capability">
+          <span><%= String(i + 1).padStart(2, '0') %></span>
+          <div>
+            <h3><%= item.heading %></h3>
+            <% if (item.text) { %><p><%= item.text %></p><% } %>
+          </div>
+          <i aria-hidden="true">↘</i>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>
